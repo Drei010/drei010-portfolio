@@ -3,7 +3,6 @@ import { parseCommand } from "@/lib/cli/parser";
 import { aboutData } from "@/lib/data/about";
 import { skillsData } from "@/lib/data/skills";
 import { projectsData } from "@/lib/data/projects";
-import { experienceData } from "@/lib/data/experience";
 import { contactData } from "@/lib/data/contact";
 import { queryAI } from "@/lib/cli/ai-adapter";
 
@@ -50,10 +49,6 @@ const commands: Record<string, CommandHandler> = {
         { text: "Browse my projects", color: "muted" },
       ]),
       makeMultiSegmentLine([
-        { text: "  experience  ", color: "prompt" },
-        { text: "See my work history", color: "muted" },
-      ]),
-      makeMultiSegmentLine([
         { text: "  contact     ", color: "prompt" },
         { text: "Get my contact info", color: "muted" },
       ]),
@@ -85,10 +80,6 @@ const commands: Record<string, CommandHandler> = {
       makeLine(""),
       makeLine(aboutData.bio),
       makeLine(""),
-      makeMultiSegmentLine([
-        { text: "📍 ", color: "default" },
-        { text: aboutData.location, color: "muted" },
-      ]),
       makeLine(""),
     ],
   }),
@@ -143,38 +134,6 @@ const commands: Record<string, CommandHandler> = {
           makeMultiSegmentLine([
             { text: `  repo: `, color: "dim" },
             { text: project.repoUrl, color: "prompt" },
-          ])
-        );
-      }
-      lines.push(makeLine(""));
-    }
-    return { lines };
-  },
-
-  experience: () => {
-    const lines: TerminalLine[] = [makeLine("")];
-    for (const exp of experienceData) {
-      lines.push(
-        makeMultiSegmentLine([
-          { text: `${exp.role}`, color: "primary" },
-          { text: ` @ `, color: "dim" },
-          { text: exp.company, color: "prompt" },
-        ])
-      );
-      lines.push(
-        makeMultiSegmentLine([
-          { text: `  ${exp.startDate} — ${exp.endDate}`, color: "muted" },
-        ])
-      );
-      lines.push(
-        makeMultiSegmentLine([
-          { text: `  ${exp.description}`, color: "default" },
-        ])
-      );
-      for (const highlight of exp.highlights) {
-        lines.push(
-          makeMultiSegmentLine([
-            { text: `    • ${highlight}`, color: "muted" },
           ])
         );
       }

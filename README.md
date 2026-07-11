@@ -4,7 +4,7 @@ A dual-view developer portfolio built with Next.js, TypeScript, and Tailwind CSS
 
 ## Features
 
-- **Web View** — Minimalist, responsive portfolio with About, Skills, Projects, Experience, and Contact sections.
+- **Web View** — Minimalist, responsive portfolio with About, Skills, Projects, and Contact sections.
 - **CLI View** — Orange-on-black hacker-aesthetic terminal with command history, tab completion, and AI-powered responses.
 - **Mobile-first** — Designed for mobile, scales beautifully to desktop.
 - **Toggle** — Switch between views via the header toggle button.
@@ -17,7 +17,6 @@ A dual-view developer portfolio built with Next.js, TypeScript, and Tailwind CSS
 | `about` | Learn about me |
 | `skills` | View tech stack |
 | `projects` | Browse projects |
-| `experience` | Work history |
 | `contact` | Contact info |
 | `ask <query>` | Ask me anything (AI-powered) |
 | `theme` | Switch to web view |
@@ -76,7 +75,6 @@ Edit the data files in `lib/data/` to update your portfolio content:
 - `about.ts` — Bio and personal info
 - `skills.ts` — Tech stack categories
 - `projects.ts` — Project showcase
-- `experience.ts` — Work history
 - `contact.ts` — Email and social links
 
 ## Deploy

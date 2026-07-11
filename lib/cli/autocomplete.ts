@@ -3,7 +3,6 @@ const COMMANDS = [
   "about",
   "projects",
   "skills",
-  "experience",
   "contact",
   "clear",
   "theme",

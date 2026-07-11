@@ -4,7 +4,6 @@ import { useView } from "@/lib/view-context";
 import { AboutSection } from "@/components/web/AboutSection";
 import { SkillsSection } from "@/components/web/SkillsSection";
 import { ProjectsSection } from "@/components/web/ProjectsSection";
-import { ExperienceSection } from "@/components/web/ExperienceSection";
 import { ContactSection } from "@/components/web/ContactSection";
 import { Terminal } from "@/components/cli/Terminal";
 
@@ -24,7 +23,6 @@ export default function Home() {
       <AboutSection />
       <SkillsSection />
       <ProjectsSection />
-      <ExperienceSection />
       <ContactSection />
     </div>
   );

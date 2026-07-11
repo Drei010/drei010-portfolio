@@ -35,11 +35,6 @@ class StaticAdapter implements AIAdapter {
         "I've built e-commerce platforms, AI chat applications, task management systems, and this interactive portfolio. Type 'projects' to see the full list with details.",
     },
     {
-      keywords: ["experience", "job", "career", "year", "long"],
-      response:
-        "I have several years of experience as a full-stack developer, progressing from frontend development at an agency to senior roles at tech companies. Type 'experience' for the full timeline.",
-    },
-    {
       keywords: ["contact", "hire", "email", "reach", "available"],
       response:
         "I'm open to opportunities! You can reach me at hello@andreikyle.dev or find me on GitHub and LinkedIn. Type 'contact' for all my links.",
@@ -65,7 +60,7 @@ class StaticAdapter implements AIAdapter {
       }
     }
 
-    return "I don't have a specific answer for that yet. Try asking about my tech stack, projects, experience, or how to contact me. Or type 'help' to see all commands.";
+    return "I don't have a specific answer for that yet. Try asking about my tech stack, projects, or how to contact me. Or type 'help' to see all commands.";
   }
 }
 

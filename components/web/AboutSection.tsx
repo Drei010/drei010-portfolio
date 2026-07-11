@@ -19,7 +19,7 @@ export function AboutSection() {
         <p className="text-lg leading-relaxed text-foreground/80">
           {aboutData.bio}
         </p>
-        <p className="mt-4 text-sm text-muted">📍 {aboutData.location}</p>
+
       </div>
     </section>
   );

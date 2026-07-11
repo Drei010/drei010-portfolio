@@ -15,16 +15,6 @@ export type Project = {
   repoUrl?: string;
 };
 
-export type Experience = {
-  id: string;
-  company: string;
-  role: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-  highlights: string[];
-};
-
 export type ContactLink = {
   platform: string;
   url: string;
