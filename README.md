@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Andrei Kyle Hidalgo — Developer Portfolio
+
+A dual-view developer portfolio built with Next.js, TypeScript, and Tailwind CSS.
+
+## Features
+
+- **Web View** — Minimalist, responsive portfolio with About, Skills, Projects, Experience, and Contact sections.
+- **CLI View** — Orange-on-black hacker-aesthetic terminal with command history, tab completion, and AI-powered responses.
+- **Mobile-first** — Designed for mobile, scales beautifully to desktop.
+- **Toggle** — Switch between views via the header toggle button.
+
+## CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `help` | Show available commands |
+| `about` | Learn about me |
+| `skills` | View tech stack |
+| `projects` | Browse projects |
+| `experience` | Work history |
+| `contact` | Contact info |
+| `ask <query>` | Ask me anything (AI-powered) |
+| `theme` | Switch to web view |
+| `clear` | Clear the terminal |
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript (strict mode)
+- **Styling:** Tailwind CSS v4
+- **Deployment:** Vercel
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the portfolio.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+├── app/              # Next.js App Router pages
+├── components/
+│   ├── cli/          # Terminal UI components
+│   └── web/          # Web view sections
+├── lib/
+│   ├── cli/          # CLI engine (commands, parser, history, AI adapter)
+│   └── data/         # Static portfolio data (TypeScript)
+└── public/           # Static assets
+```
 
-## Learn More
+## AI Integration
 
-To learn more about Next.js, take a look at the following resources:
+The CLI `ask` command uses a pluggable adapter pattern. Currently it uses a `StaticAdapter` with keyword-matched responses. To connect your RAG backend:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Implement the `AIAdapter` interface in `lib/cli/ai-adapter.ts`
+2. Replace the `activeAdapter` with your implementation
+3. See the comments in `ai-adapter.ts` for details
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Customization
 
-## Deploy on Vercel
+Edit the data files in `lib/data/` to update your portfolio content:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `about.ts` — Bio and personal info
+- `skills.ts` — Tech stack categories
+- `projects.ts` — Project showcase
+- `experience.ts` — Work history
+- `contact.ts` — Email and social links
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+Deploy to Vercel with one click:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/andreikylehidalgo/portfolio)
+
+Or use the Vercel CLI:
+
+```bash
+npx vercel
+```
