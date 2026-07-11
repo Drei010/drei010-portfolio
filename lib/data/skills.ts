@@ -3,18 +3,18 @@ import { SkillCategory } from "@/lib/types";
 export const skillsData: SkillCategory[] = [
   {
     name: "Frontend",
-    skills: ["React", "Next.js", "TypeScript", "Tailwind CSS", "HTML/CSS"],
+    skills: ["SAP UI5", "React", "Next.js", "TypeScript", "Tailwind CSS", "HTML/CSS"],
   },
   {
     name: "Backend",
-    skills: ["Node.js", "Python", "REST APIs", "GraphQL", "PostgreSQL"],
+    skills: ["Node.js", "Python", "REST APIs", "Supabase"],
   },
   {
     name: "DevOps & Cloud",
-    skills: ["AWS", "Docker", "CI/CD", "Vercel", "Git"],
+    skills: ["AWS", "SAP BTP", "GitHub CI/CD", "Vercel", "Render", "Git"],
   },
   {
-    name: "Tools & Practices",
-    skills: ["VS Code", "Figma", "Agile", "TDD", "System Design"],
+    name: "AI",
+    skills: ["OpenAI APIs", "RAG", "LangChain", "AI Integration", "System Design"],
   },
 ];
