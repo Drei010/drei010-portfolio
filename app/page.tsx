@@ -13,7 +13,7 @@ export default function Home() {
 
   if (view === "cli") {
     return (
-      <div className="flex flex-1 animate-fade-in">
+      <div className="flex flex-1 content-center animate-fade-in">
         <Terminal />
       </div>
     );

@@ -10,34 +10,109 @@ import { getCompletion } from "@/lib/cli/autocomplete";
 import { useView } from "@/lib/view-context";
 
 const WELCOME_LINES: TerminalLine[] = [
+
   {
+
     id: "welcome-1",
-    segments: [{ text: "╔══════════════════════════════════════╗", color: "primary" }],
+
+    centered: true,
+
+    segments: [
+
+      { text: "╔══════════════════════════════════════╗", color: "primary" },
+
+    ],
+
   },
+
   {
+
     id: "welcome-2",
-    segments: [{ text: "║  ", color: "primary" }, { text: "andrei@portfolio", color: "prompt" }, { text: " ~ ", color: "dim" }, { text: "v1.0.0", color: "muted" }, { text: "       ║", color: "primary" }],
+
+    centered: true,
+
+    segments: [
+
+      { text: "║  ", color: "primary" },
+
+      { text: "andrei@portfolio", color: "prompt" },
+
+      { text: " ~ ", color: "dim" },
+
+      { text: "v1.0.0", color: "muted" },
+
+      { text: "       ║", color: "primary" },
+
+    ],
+
   },
+
   {
+
     id: "welcome-3",
-    segments: [{ text: "╚══════════════════════════════════════╝", color: "primary" }],
+
+    centered: true,
+
+    segments: [
+
+      { text: "╚══════════════════════════════════════╝", color: "primary" },
+
+    ],
+
   },
+
   {
+
     id: "welcome-4",
+
+    centered: true,
+
     segments: [{ text: "" }],
+
   },
+
   {
+
     id: "welcome-5",
-    segments: [{ text: "Welcome to my interactive portfolio.", color: "default" }],
+
+    centered: true,
+
+    segments: [
+
+      { text: "Welcome to my interactive portfolio.", color: "default" },
+
+    ],
+
   },
+
   {
+
     id: "welcome-6",
-    segments: [{ text: "Type ", color: "muted" }, { text: "help", color: "primary" }, { text: " to see available commands.", color: "muted" }],
+
+    centered: true,
+
+    segments: [
+
+      { text: "Type ", color: "muted" },
+
+      { text: "help", color: "primary" },
+
+      { text: " to see available commands.", color: "muted" },
+
+    ],
+
   },
+
   {
+
     id: "welcome-7",
+
+    centered: true,
+
     segments: [{ text: "" }],
+
   },
+
 ];
 
 export function Terminal() {
@@ -109,10 +184,10 @@ export function Terminal() {
   );
 
   return (
-    <div className="flex flex-1 flex-col bg-terminal-bg font-mono text-sm">
+    <div className="flex flex-1 flex-col content-center bg-terminal-bg font-mono text-sm">
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 scrollbar-hidden"
+        className=" overflow-y-auto p-4 scrollbar-hidden"
         onClick={() => {
           const inputEl = document.querySelector<HTMLInputElement>(
             'input[aria-label="Terminal command input"]'

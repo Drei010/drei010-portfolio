@@ -16,12 +16,18 @@ const colorMap: Record<NonNullable<OutputSegment["color"]>, string> = {
 
 export function OutputLine({ line }: OutputLineProps) {
   return (
-    <div className={`whitespace-pre-wrap break-words ${line.isCommand ? "mt-2" : ""}`}>
-      {line.segments.map((segment, i) => (
-        <span key={i} className={colorMap[segment.color ?? "default"]}>
-          {segment.text}
-        </span>
-      ))}
+    <div
+      className={`${
+        line.centered ? "flex justify-center" : ""
+      } ${line.isCommand ? "mt-2" : ""}`}
+    >
+      <div className="whitespace-pre-wrap break-words">
+        {line.segments.map((segment, i) => (
+          <span key={i} className={colorMap[segment.color ?? "default"]}>
+            {segment.text}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

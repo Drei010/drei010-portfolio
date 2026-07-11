@@ -35,7 +35,6 @@ export type AboutData = {
   name: string;
   title: string;
   bio: string;
-  location: string;
   avatarUrl?: string;
 };
 
@@ -53,6 +52,7 @@ export type TerminalLine = {
   id: string;
   segments: OutputSegment[];
   isCommand?: boolean;
+  centered?: boolean;
 };
 
 export type CommandResult = {
