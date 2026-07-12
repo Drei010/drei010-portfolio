@@ -4,6 +4,7 @@ import { aboutData } from "@/lib/data/about";
 import { skillsData } from "@/lib/data/skills";
 import { projectsData } from "@/lib/data/projects";
 import { contactData } from "@/lib/data/contact";
+import { servicesData } from "@/lib/data/services";
 import { queryAI } from "@/lib/cli/ai-adapter";
 
 function makeLine(text: string, color?: TerminalLine["segments"][0]["color"]): TerminalLine {
@@ -43,6 +44,10 @@ const commands: Record<string, CommandHandler> = {
       makeMultiSegmentLine([
         { text: "  skills      ", color: "prompt" },
         { text: "View my tech stack", color: "muted" },
+      ]),
+      makeMultiSegmentLine([
+        { text: "  services    ", color: "prompt" },
+        { text: "View services I offer", color: "muted" },
       ]),
       makeMultiSegmentLine([
         { text: "  projects    ", color: "prompt" },
@@ -97,6 +102,31 @@ const commands: Record<string, CommandHandler> = {
           { text: `  ${category.skills.join(" • ")}`, color: "default" },
         ])
       );
+      lines.push(makeLine(""));
+    }
+    return { lines };
+  },
+
+  services: () => {
+    const lines: TerminalLine[] = [makeLine("")];
+    for (const service of servicesData) {
+      lines.push(
+        makeMultiSegmentLine([
+          { text: `▸ ${service.title}`, color: "primary" },
+        ])
+      );
+      lines.push(
+        makeMultiSegmentLine([
+          { text: `  ${service.description}`, color: "muted" },
+        ])
+      );
+      for (const highlight of service.highlights) {
+        lines.push(
+          makeMultiSegmentLine([
+            { text: `    • ${highlight}`, color: "default" },
+          ])
+        );
+      }
       lines.push(makeLine(""));
     }
     return { lines };

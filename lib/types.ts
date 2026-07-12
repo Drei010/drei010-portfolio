@@ -50,3 +50,10 @@ export type CommandResult = {
   clear?: boolean;
   switchView?: ViewMode;
 };
+
+export type Service = {
+  id: string;
+  title: string;
+  description: string;
+  highlights: string[];
+};
