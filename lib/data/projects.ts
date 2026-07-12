@@ -3,33 +3,33 @@ import { Project } from "@/lib/types";
 export const projectsData: Project[] = [
   {
     id: "project-1",
-    title: "E-Commerce Platform",
+    title: "RAG Backend",
     description:
-      "A full-stack e-commerce application with real-time inventory management, payment processing, and admin dashboard.",
-    thumbnail: "/projects/ecommerce.png",
-    techStack: ["Next.js", "TypeScript", "PostgreSQL", "Stripe", "Tailwind CSS"],
+      "A Retrieval-Augmented Generation (RAG) backend service that integrates with OpenAI APIs to provide context-aware responses for various applications.",
+    thumbnail: "/projects/rag-backend.png",
+    techStack: ["FastAPI", "Python", "ChromaDB", "AWS S3 Bucket", "OpenAI", "LangChain", "Render"],
     liveUrl: "https://example.com",
-    repoUrl: "https://github.com/andreikylehidalgo/ecommerce",
+    repoUrl: "https://github.com/andreikylehidalgo/rag-backend",
   },
   {
     id: "project-2",
-    title: "AI Chat Application",
+    title: "BiteScout AI Chat",
     description:
-      "A conversational AI interface with RAG capabilities, supporting multiple LLM providers and document ingestion.",
+      "Hungry and looking for the perfect meal? BiteScout AI Chat helps you discover delicious options based on location.",
     thumbnail: "/projects/ai-chat.png",
-    techStack: ["React", "Python", "FastAPI", "OpenAI", "Pinecone"],
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "OpenAI", "Groq", "Foursquare APIs", "AI Integration", "Vercel"],
     liveUrl: "https://example.com",
     repoUrl: "https://github.com/andreikylehidalgo/ai-chat",
   },
   {
     id: "project-3",
-    title: "Task Management System",
+    title: "RehabBuddy, A AI Stroke Rehabilitation Companion",
     description:
-      "A collaborative project management tool with real-time updates, Kanban boards, and team workflows.",
-    thumbnail: "/projects/taskmanager.png",
-    techStack: ["Next.js", "TypeScript", "Prisma", "WebSockets", "AWS"],
+      "A stroke rehabilitation companion that leverages AI to provide personalized exercises, progress tracking, and motivational support for patients.",
+    thumbnail: "/projects/rehabbuddy.png",
+    techStack: ["Next.js", "TypeScript", "Supabase", "OpenAI", "Groq", "Vercel"],
     liveUrl: "https://example.com",
-    repoUrl: "https://github.com/andreikylehidalgo/taskmanager",
+    repoUrl: "https://github.com/andreikylehidalgo/rehabbuddy",
   },
   {
     id: "project-4",
@@ -38,6 +38,6 @@ export const projectsData: Project[] = [
       "This portfolio site — a dual-view experience with a minimalist web interface and an interactive CLI terminal.",
     thumbnail: "/projects/portfolio.png",
     techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
-    repoUrl: "https://github.com/andreikylehidalgo/portfolio",
+    repoUrl: "https://github.com/Drei010/drei010-portfolio",
   },
 ];
