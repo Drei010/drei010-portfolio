@@ -5,7 +5,7 @@ export const contactData: ContactData = {
   links: [
     {
       platform: "LinkedIn",
-      url: "https://linkedin.com/in/andreikylehidalgo",
+      url: "https://linkedin.com/in/andrei-kyle-hidalgo",
       label: "andreikylehidalgo",
     },
   ],
