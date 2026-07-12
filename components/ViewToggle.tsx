@@ -5,26 +5,34 @@ import { useView } from "@/lib/view-context";
 export function ViewToggle() {
   const { view, toggleView, cliCardVisible } = useView();
 
+  const isHidden = view === "web" && cliCardVisible;
+
   return (
-    <button
-      onClick={toggleView}
-      className={`flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-mono transition-all duration-300 hover:border-primary hover:text-primary ${view === "web" && cliCardVisible ? "pointer-events-none opacity-0" : "opacity-100"}`}
-      aria-label={`Switch to ${view === "web" ? "CLI" : "Web"} view`}
-      aria-hidden={view === "web" && cliCardVisible}
-      tabIndex={view === "web" && cliCardVisible ? -1 : 0}
+    <div
+      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+        isHidden ? "ml-0 max-w-0 opacity-0" : "ml-3 max-w-32 opacity-100"
+      }`}
     >
-      {view === "web" ? (
-        <>
-          <TerminalIcon />
-          <span className="hidden sm:inline">CLI</span>
-        </>
-      ) : (
-        <>
-          <GlobeIcon />
-          <span className="hidden sm:inline">Web</span>
-        </>
-      )}
-    </button>
+      <button
+        onClick={toggleView}
+        className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-mono transition-colors duration-200 hover:border-primary hover:text-primary"
+        aria-label={`Switch to ${view === "web" ? "CLI" : "Web"} view`}
+        aria-hidden={isHidden}
+        tabIndex={isHidden ? -1 : 0}
+      >
+        {view === "web" ? (
+          <>
+            <TerminalIcon />
+            <span className="hidden sm:inline">CLI</span>
+          </>
+        ) : (
+          <>
+            <GlobeIcon />
+            <span className="hidden sm:inline">Web</span>
+          </>
+        )}
+      </button>
+    </div>
   );
 }
 

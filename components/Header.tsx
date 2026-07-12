@@ -13,7 +13,7 @@ export function Header() {
   const logoSrc = view === "cli" || theme === "dark" ? "/1.svg" : "/2.svg";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
+    <header className={`sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm ${view === "cli" ? "dark" : ""}`}>
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         <a href="#about" className="flex items-center">
           <Image
@@ -26,7 +26,7 @@ export function Header() {
           />
         </a>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center">
           <ThemeToggle />
           <ViewToggle />
         </div>
