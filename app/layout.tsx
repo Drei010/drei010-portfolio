@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ViewProvider } from "@/lib/view-context";
+import { ThemeProvider } from "@/lib/theme-context";
 import { Header } from "@/components/Header";
 
 const geistSans = Geist({
@@ -35,6 +36,8 @@ export const metadata: Metadata = {
   },
 };
 
+const themeScript = `(function(){try{document.documentElement.classList.add("no-transition");var t=localStorage.getItem("theme");var ts=localStorage.getItem("theme-timestamp");if(t&&ts){var elapsed=Date.now()-Number(ts);if(elapsed<86400000){if(t==="dark")document.documentElement.classList.add("dark");return}}localStorage.removeItem("theme");localStorage.removeItem("theme-timestamp");var h=new Date().getHours();if(h<6||h>=18)document.documentElement.classList.add("dark")}catch(e){}})()`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -44,14 +47,20 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        <ViewProvider>
-          <Header />
-          <main className="flex flex-1 flex-col" role="main">
-            {children}
-          </main>
-        </ViewProvider>
+        <ThemeProvider>
+          <ViewProvider>
+            <Header />
+            <main className="flex flex-1 flex-col" role="main">
+              {children}
+            </main>
+          </ViewProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

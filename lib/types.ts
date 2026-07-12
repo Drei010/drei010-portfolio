@@ -1,5 +1,7 @@
 export type ViewMode = "web" | "cli";
 
+export type ThemeMode = "light" | "dark";
+
 export type SkillCategory = {
   name: string;
   skills: string[];

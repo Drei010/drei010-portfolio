@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useReducedMotion } from "motion/react";
+import { useTheme } from "@/lib/theme-context";
 
 type Node = {
   x: number;
@@ -28,6 +29,7 @@ const AMBIENT_MAX_OPACITY = 0.35;
 const CURSOR_MAX_OPACITY = 0.6;
 const NODE_OPACITY = 0.5;
 const MIN_NODE_SPACING = 80;
+const LIGHT_MODE_OPACITY_SCALE = 0.4;
 
 function createNodes(width: number, height: number): Node[] {
   if (width === 0 || height === 0) return [];
@@ -103,6 +105,13 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
   });
   const hasPointerRef = useRef<boolean>(false);
   const shouldReduceMotion = useReducedMotion();
+  const { theme } = useTheme();
+  const opacityScale = theme === "light" ? LIGHT_MODE_OPACITY_SCALE : 1;
+  const opacityScaleRef = useRef(opacityScale);
+
+  useEffect(() => {
+    opacityScaleRef.current = opacityScale;
+  }, [opacityScale]);
 
   const syncCanvasSize = useCallback((canvas: HTMLCanvasElement) => {
     const dpr = window.devicePixelRatio || 1;
@@ -127,6 +136,8 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
     (ctx: CanvasRenderingContext2D) => {
       const { width, height } = sizeRef.current;
       if (width === 0 || height === 0) return;
+
+      const scale = opacityScaleRef.current;
 
       ctx.clearRect(0, 0, width, height);
 
@@ -164,7 +175,7 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
 
           if (distance < CONNECTION_DISTANCE) {
             const opacity =
-              AMBIENT_MAX_OPACITY * (1 - distance / CONNECTION_DISTANCE);
+              AMBIENT_MAX_OPACITY * scale * (1 - distance / CONNECTION_DISTANCE);
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -185,7 +196,7 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
 
           if (distance < CURSOR_CONNECTION_DISTANCE) {
             const opacity =
-              CURSOR_MAX_OPACITY * (1 - distance / CURSOR_CONNECTION_DISTANCE);
+              CURSOR_MAX_OPACITY * scale * (1 - distance / CURSOR_CONNECTION_DISTANCE);
             ctx.beginPath();
             ctx.moveTo(mouse.x, mouse.y);
             ctx.lineTo(node.x, node.y);
@@ -197,7 +208,7 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
 
         ctx.beginPath();
         ctx.arc(mouse.x, mouse.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${LINE_COLOR}, ${CURSOR_MAX_OPACITY})`;
+        ctx.fillStyle = `rgba(${LINE_COLOR}, ${CURSOR_MAX_OPACITY * scale})`;
         ctx.fill();
       }
 
@@ -205,7 +216,7 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
       for (const node of nodes) {
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${LINE_COLOR}, ${NODE_OPACITY})`;
+        ctx.fillStyle = `rgba(${LINE_COLOR}, ${NODE_OPACITY * scale})`;
         ctx.fill();
       }
     },
