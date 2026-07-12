@@ -42,7 +42,7 @@ export function CliFeatureCard() {
   return (
     <motion.div
       ref={cardRef}
-      className="group relative flex flex-col rounded-xl border border-border bg-background p-6 transition-[border-color,box-shadow] duration-300 hover:border-primary/70 hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]"
+      className="group relative flex flex-col rounded-xl border border-border bg-background p-6 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-primary/70 hover:shadow-md hover:shadow-primary/10 dark:shadow-none dark:hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]"
       variants={entranceVariants}
       initial="hidden"
       whileInView="visible"

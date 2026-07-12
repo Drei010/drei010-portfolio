@@ -22,7 +22,7 @@ export function ServiceCard({ service, index }: ServiceCardProps) {
 
   return (
     <motion.div
-      className="group relative flex flex-col rounded-xl border border-border bg-background p-4 transition-[border-color,box-shadow] duration-300 hover:border-primary/70 hover:shadow-[0_0_20px_rgba(249,115,22,0.15)] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+      className="group relative flex flex-col rounded-xl border border-border bg-background p-4 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-primary/70 hover:shadow-md hover:shadow-primary/10 dark:shadow-none dark:hover:shadow-[0_0_20px_rgba(249,115,22,0.15)] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
       variants={entranceVariants}
       initial="hidden"
       whileInView="visible"

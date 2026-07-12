@@ -32,7 +32,7 @@ export function ContactLinks() {
 
       <a
         href={`mailto:${contactData.email}`}
-        className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-sm transition-colors hover:border-primary hover:text-primary"
+        className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-sm shadow-sm transition-[colors,box-shadow] hover:border-primary hover:text-primary dark:shadow-none"
         aria-label={`Send email to ${contactData.email}`}
       >
         <MailIcon />
@@ -44,7 +44,7 @@ export function ContactLinks() {
           href={linkedInLink.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-sm transition-colors hover:border-primary hover:text-primary"
+          className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-sm shadow-sm transition-[colors,box-shadow] hover:border-primary hover:text-primary dark:shadow-none"
           aria-label={`Visit LinkedIn profile`}
         >
           <LinkedInIcon />
