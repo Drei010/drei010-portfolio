@@ -3,8 +3,7 @@
 import { useView } from "@/lib/view-context";
 import { AboutSection } from "@/components/web/AboutSection";
 import { ServicesSection } from "@/components/web/ServicesSection";
-import { SkillsSection } from "@/components/web/SkillsSection";
-import { ProjectsSection } from "@/components/web/ProjectsSection";
+import { SkillsProjectsConnected } from "@/components/web/SkillsProjectsConnected";
 import { ContactSection } from "@/components/web/ContactSection";
 import { Terminal } from "@/components/cli/Terminal";
 
@@ -23,8 +22,7 @@ export default function Home() {
     <div className="flex flex-1 flex-col animate-fade-in">
       <AboutSection />
       <ServicesSection />
-      <SkillsSection />
-      <ProjectsSection />
+      <SkillsProjectsConnected />
       <ContactSection />
     </div>
   );
