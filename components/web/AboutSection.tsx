@@ -3,7 +3,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import { aboutData } from "@/lib/data/about";
 import { CliFeatureCard } from "@/components/web/CliFeatureCard";
-import { ConstellationBackground } from "@/components/web/ConstellationBackground";
 
 export function AboutSection() {
   const shouldReduceMotion = useReducedMotion();
@@ -14,11 +13,8 @@ export function AboutSection() {
   };
 
   return (
-    <section id="about" className="relative overflow-x-clip px-4 py-16 sm:py-24">
-      <ConstellationBackground
-        className="pointer-events-auto absolute top-[-3rem] right-0 bottom-[-3rem] left-0 z-0 [mask-image:linear-gradient(to_bottom,transparent_0%,black_15%,black_85%,transparent_100%)]"
-      />
-      <div className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+    <section id="about" className="px-4 py-16 sm:py-24">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
         {/* Left column — About data */}
         <div>
           <motion.h1

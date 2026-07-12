@@ -28,7 +28,7 @@ export function ProjectCard({
   return (
     <motion.article
       ref={cardRef}
-      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border transition-[border-color,box-shadow] duration-300 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none ${
+      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border bg-background transition-[border-color,box-shadow] duration-300 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none ${
         highlighted
           ? "border-primary/70 shadow-[0_0_24px_rgba(249,115,22,0.2)]"
           : "border-border hover:border-primary/70 hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]"

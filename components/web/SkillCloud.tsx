@@ -76,7 +76,7 @@ function SkillCategoryCluster({
   return (
     <motion.div
       ref={clusterRef}
-      className="group/cluster relative rounded-xl border border-border p-4 transition-[border-color,background-color,box-shadow] duration-300 hover:border-primary/40 hover:bg-surface-alt/50 hover:shadow-[0_0_16px_rgba(249,115,22,0.08)]"
+      className="group/cluster relative rounded-xl border border-border bg-background p-4 transition-[border-color,background-color,box-shadow] duration-300 hover:border-primary/40 hover:bg-surface-alt/50 hover:shadow-[0_0_16px_rgba(249,115,22,0.08)]"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}

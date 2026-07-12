@@ -257,8 +257,8 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
       mouseRef.current = { ...mouseRef.current, active: false };
     };
 
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
 
     let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
     let prevResizeWidth = sizeRef.current.width;
@@ -295,8 +295,8 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
 
     return () => {
       cancelAnimationFrame(animationFrameRef.current);
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("resize", handleResize);
       pointerQuery.removeEventListener("change", handlePointerChange);
       if (resizeTimeout) clearTimeout(resizeTimeout);
