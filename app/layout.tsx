@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Andrei Kyle Hidalgo | Full-Stack Developer",
+  title: "Andrei Hidalgo's Portfolio",
   description:
     "Full-Stack Developer portfolio featuring an interactive CLI terminal and a modern web interface. Built with Next.js, TypeScript, and Tailwind CSS.",
   keywords: [

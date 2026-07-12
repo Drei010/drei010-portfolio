@@ -10,7 +10,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        <div className="flex items-center">
+        <a href="#about" className="flex items-center">
           <Image
             src="/1.svg"
             alt="Andrei Kyle Logo"
@@ -19,7 +19,7 @@ export function Header() {
             className="h-12 w-auto"
             priority
           />
-        </div>
+        </a>
 
         <ViewToggle />
       </div>
