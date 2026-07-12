@@ -7,19 +7,22 @@ type ViewContextValue = {
   view: ViewMode;
   toggleView: () => void;
   setView: (mode: ViewMode) => void;
+  cliCardVisible: boolean;
+  setCliCardVisible: (visible: boolean) => void;
 };
 
 const ViewContext = createContext<ViewContextValue | null>(null);
 
 export function ViewProvider({ children }: { children: ReactNode }) {
   const [view, setView] = useState<ViewMode>("web");
+  const [cliCardVisible, setCliCardVisible] = useState(false);
 
   const toggleView = useCallback(() => {
     setView((prev) => (prev === "web" ? "cli" : "web"));
   }, []);
 
   return (
-    <ViewContext.Provider value={{ view, toggleView, setView }}>
+    <ViewContext.Provider value={{ view, toggleView, setView, cliCardVisible, setCliCardVisible }}>
       {children}
     </ViewContext.Provider>
   );

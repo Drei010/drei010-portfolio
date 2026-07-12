@@ -3,13 +3,15 @@
 import { useView } from "@/lib/view-context";
 
 export function ViewToggle() {
-  const { view, toggleView } = useView();
+  const { view, toggleView, cliCardVisible } = useView();
 
   return (
     <button
       onClick={toggleView}
-      className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-mono transition-colors hover:border-primary hover:text-primary"
+      className={`flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-mono transition-all duration-300 hover:border-primary hover:text-primary ${view === "web" && cliCardVisible ? "pointer-events-none opacity-0" : "opacity-100"}`}
       aria-label={`Switch to ${view === "web" ? "CLI" : "Web"} view`}
+      aria-hidden={view === "web" && cliCardVisible}
+      tabIndex={view === "web" && cliCardVisible ? -1 : 0}
     >
       {view === "web" ? (
         <>

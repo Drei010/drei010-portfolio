@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useView } from "@/lib/view-context";
 
@@ -11,8 +12,27 @@ const features = [
 ];
 
 export function CliFeatureCard() {
-  const { toggleView } = useView();
+  const { toggleView, setCliCardVisible } = useView();
   const shouldReduceMotion = useReducedMotion();
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setCliCardVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [setCliCardVisible]);
 
   const entranceVariants = {
     hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 },
@@ -21,7 +41,8 @@ export function CliFeatureCard() {
 
   return (
     <motion.div
-      className="group relative flex flex-col rounded-xl border border-border p-6 transition-[border-color,box-shadow] duration-300 hover:border-primary/70 hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]"
+      ref={cardRef}
+      className="group relative flex flex-col rounded-xl border border-border bg-background p-6 transition-[border-color,box-shadow] duration-300 hover:border-primary/70 hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]"
       variants={entranceVariants}
       initial="hidden"
       whileInView="visible"
