@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { contactData } from "@/lib/data/contact";
 
 type FormErrors = {
@@ -14,6 +15,11 @@ export function ContactForm() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
+  const shouldReduceMotion = useReducedMotion();
+
+  const entranceVariants = shouldReduceMotion
+    ? { hidden: { opacity: 0 }, visible: { opacity: 1 } }
+    : { hidden: { opacity: 0, x: -40 }, visible: { opacity: 1, x: 0 } };
 
   function validate(): FormErrors {
     const newErrors: FormErrors = {};
@@ -50,7 +56,21 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+    <motion.form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      noValidate
+      variants={entranceVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{
+        type: "spring",
+        stiffness: 80,
+        damping: 20,
+        delay: 0.2,
+      }}
+    >
       <div>
         <label htmlFor="contact-email" className="mb-1 block text-sm text-muted">
           Your Email
@@ -108,6 +128,6 @@ export function ContactForm() {
       >
         Send Message
       </button>
-    </form>
+    </motion.form>
   );
 }

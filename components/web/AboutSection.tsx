@@ -13,12 +13,15 @@ export function AboutSection() {
   };
 
   return (
-    <section id="about" className="px-4 py-16 sm:py-24">
+    <section
+      id="about"
+      className="flex min-h-[calc(100vh-3.5rem)] items-center px-4 py-16 sm:py-24 lg:py-0"
+    >
       <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
         {/* Left column — About data */}
         <div>
           <motion.h1
-            className="text-3xl font-bold sm:text-4xl"
+            className="text-3xl font-bold sm:text-4xl lg:text-5xl"
             variants={textVariants}
             initial="hidden"
             whileInView="visible"
@@ -34,7 +37,7 @@ export function AboutSection() {
           </motion.h1>
 
           <motion.p
-            className="mt-2 text-lg font-medium text-primary"
+            className="mt-3 text-lg font-medium text-primary lg:text-xl"
             variants={textVariants}
             initial="hidden"
             whileInView="visible"
@@ -50,7 +53,7 @@ export function AboutSection() {
           </motion.p>
 
           <motion.p
-            className="mt-4 text-base leading-relaxed text-foreground/80"
+            className="mt-4 text-base leading-relaxed text-foreground/80 lg:text-lg"
             variants={textVariants}
             initial="hidden"
             whileInView="visible"
@@ -67,7 +70,7 @@ export function AboutSection() {
 
           <motion.a
             href="#contact"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-background transition-colors duration-200 hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-background transition-colors duration-200 hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none lg:text-base"
             variants={textVariants}
             initial="hidden"
             whileInView="visible"

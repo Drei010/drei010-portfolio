@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import { skillsData } from "@/lib/data/skills";
+import { AnimatedHeading } from "@/components/web/AnimatedHeading";
 
 type SkillCloudProps = {
   activeSkill: string | null;
@@ -29,7 +30,9 @@ export function SkillCloud({ activeSkill, onSkillClick }: SkillCloudProps) {
   return (
     <section id="skills" className="px-4 py-16 sm:py-24">
       <div className="mx-auto max-w-5xl">
-        <h2 className="mb-8 text-xl font-bold sm:text-2xl">Skills</h2>
+        <AnimatedHeading className="mb-8 text-xl font-bold sm:text-2xl">
+          Skills
+        </AnimatedHeading>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {skillsData.map((category, categoryIndex) => (
             <SkillCategoryCluster
