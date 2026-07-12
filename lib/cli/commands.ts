@@ -1,5 +1,4 @@
 import { CommandResult, TerminalLine } from "@/lib/types";
-import { parseCommand } from "@/lib/cli/parser";
 import { aboutData } from "@/lib/data/about";
 import { skillsData } from "@/lib/data/skills";
 import { projectsData } from "@/lib/data/projects";
@@ -7,19 +6,24 @@ import { contactData } from "@/lib/data/contact";
 import { servicesData } from "@/lib/data/services";
 import { queryAI } from "@/lib/cli/ai-adapter";
 
-function makeLine(text: string, color?: TerminalLine["segments"][0]["color"]): TerminalLine {
-  return {
-    id: `line-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    segments: [{ text, color: color ?? "default" }],
-  };
+function parseCommand(input: string): { name: string; args: string[] } {
+  const parts = input.trim().split(/\s+/);
+  const name = (parts[0] ?? "").toLowerCase();
+  const args = parts.slice(1);
+  return { name, args };
 }
 
-function makeMultiSegmentLine(
-  segments: TerminalLine["segments"]
+function makeLine(segments: TerminalLine["segments"]): TerminalLine;
+function makeLine(text: string, color?: TerminalLine["segments"][0]["color"]): TerminalLine;
+function makeLine(
+  input: string | TerminalLine["segments"],
+  color?: TerminalLine["segments"][0]["color"]
 ): TerminalLine {
   return {
     id: `line-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    segments,
+    segments: typeof input === "string"
+      ? [{ text: input, color: color ?? "default" }]
+      : input,
   };
 }
 
@@ -29,43 +33,43 @@ const commands: Record<string, CommandHandler> = {
   help: () => ({
     lines: [
       makeLine(""),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "Available Commands:", color: "primary" },
       ]),
       makeLine(""),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  help        ", color: "prompt" },
         { text: "Show this help message", color: "muted" },
       ]),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  about       ", color: "prompt" },
         { text: "Learn about me", color: "muted" },
       ]),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  skills      ", color: "prompt" },
         { text: "View my tech stack", color: "muted" },
       ]),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  services    ", color: "prompt" },
         { text: "View services I offer", color: "muted" },
       ]),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  projects    ", color: "prompt" },
         { text: "Browse my projects", color: "muted" },
       ]),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  contact     ", color: "prompt" },
         { text: "Get my contact info", color: "muted" },
       ]),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  ask <query> ", color: "prompt" },
         { text: "Ask me anything", color: "muted" },
       ]),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  theme       ", color: "prompt" },
         { text: "Switch to web view", color: "muted" },
       ]),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  clear       ", color: "prompt" },
         { text: "Clear the terminal", color: "muted" },
       ]),
@@ -76,10 +80,10 @@ const commands: Record<string, CommandHandler> = {
   about: () => ({
     lines: [
       makeLine(""),
-      makeMultiSegmentLine([
+      makeLine([
         { text: `${aboutData.name}`, color: "primary" },
       ]),
-      makeMultiSegmentLine([
+      makeLine([
         { text: aboutData.title, color: "prompt" },
       ]),
       makeLine(""),
@@ -93,12 +97,12 @@ const commands: Record<string, CommandHandler> = {
     const lines: TerminalLine[] = [makeLine("")];
     for (const category of skillsData) {
       lines.push(
-        makeMultiSegmentLine([
+        makeLine([
           { text: `[${category.name}]`, color: "primary" },
         ])
       );
       lines.push(
-        makeMultiSegmentLine([
+        makeLine([
           { text: `  ${category.skills.join(" • ")}`, color: "default" },
         ])
       );
@@ -111,18 +115,18 @@ const commands: Record<string, CommandHandler> = {
     const lines: TerminalLine[] = [makeLine("")];
     for (const service of servicesData) {
       lines.push(
-        makeMultiSegmentLine([
+        makeLine([
           { text: `▸ ${service.title}`, color: "primary" },
         ])
       );
       lines.push(
-        makeMultiSegmentLine([
+        makeLine([
           { text: `  ${service.description}`, color: "muted" },
         ])
       );
       for (const highlight of service.highlights) {
         lines.push(
-          makeMultiSegmentLine([
+          makeLine([
             { text: `    • ${highlight}`, color: "default" },
           ])
         );
@@ -136,24 +140,24 @@ const commands: Record<string, CommandHandler> = {
     const lines: TerminalLine[] = [makeLine("")];
     for (const project of projectsData) {
       lines.push(
-        makeMultiSegmentLine([
+        makeLine([
           { text: `▸ ${project.title}`, color: "primary" },
         ])
       );
       lines.push(
-        makeMultiSegmentLine([
+        makeLine([
           { text: `  ${project.description}`, color: "muted" },
         ])
       );
       lines.push(
-        makeMultiSegmentLine([
+        makeLine([
           { text: `  tech: `, color: "dim" },
           { text: project.techStack.join(", "), color: "default" },
         ])
       );
       if (project.liveUrl) {
         lines.push(
-          makeMultiSegmentLine([
+          makeLine([
             { text: `  live: `, color: "dim" },
             { text: project.liveUrl, color: "prompt" },
           ])
@@ -161,7 +165,7 @@ const commands: Record<string, CommandHandler> = {
       }
       if (project.repoUrl) {
         lines.push(
-          makeMultiSegmentLine([
+          makeLine([
             { text: `  repo: `, color: "dim" },
             { text: project.repoUrl, color: "prompt" },
           ])
@@ -175,16 +179,16 @@ const commands: Record<string, CommandHandler> = {
   contact: () => ({
     lines: [
       makeLine(""),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "Get in touch:", color: "primary" },
       ]),
       makeLine(""),
-      makeMultiSegmentLine([
+      makeLine([
         { text: "  email: ", color: "dim" },
         { text: contactData.email, color: "prompt" },
       ]),
       ...contactData.links.map((link) =>
-        makeMultiSegmentLine([
+        makeLine([
           { text: `  ${link.platform.toLowerCase()}: `, color: "dim" },
           { text: link.url, color: "prompt" },
         ])
@@ -209,7 +213,7 @@ const commands: Record<string, CommandHandler> = {
       return {
         lines: [
           makeLine(""),
-          makeMultiSegmentLine([
+          makeLine([
             { text: "Usage: ", color: "muted" },
             { text: "ask <your question>", color: "prompt" },
           ]),
@@ -221,7 +225,7 @@ const commands: Record<string, CommandHandler> = {
     return {
       lines: [
         makeLine(""),
-        makeMultiSegmentLine([{ text: response, color: "default" }]),
+        makeLine([{ text: response, color: "default" }]),
         makeLine(""),
       ],
     };
@@ -236,11 +240,11 @@ export async function executeCommand(input: string): Promise<CommandResult> {
     return {
       lines: [
         makeLine(""),
-        makeMultiSegmentLine([
+        makeLine([
           { text: `Command not found: `, color: "muted" },
           { text: name, color: "primary" },
         ]),
-        makeMultiSegmentLine([
+        makeLine([
           { text: `Type `, color: "muted" },
           { text: "help", color: "prompt" },
           { text: ` to see available commands.`, color: "muted" },

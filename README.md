@@ -63,11 +63,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the portfolio.
 
 ## AI Integration
 
-The CLI `ask` command uses a pluggable adapter pattern. Currently it uses a `StaticAdapter` with keyword-matched responses. To connect your RAG backend:
-
-1. Implement the `AIAdapter` interface in `lib/cli/ai-adapter.ts`
-2. Replace the `activeAdapter` with your implementation
-3. See the comments in `ai-adapter.ts` for details
+The CLI `ask` command uses keyword-matched static responses defined in `lib/cli/ai-adapter.ts`. To connect a real AI backend, replace the `queryAI` function body with your API call.
 
 ## Customization
 

@@ -35,9 +35,3 @@ export function getCompletion(input: string): string | null {
 
   return null;
 }
-
-export function getCompletionSuggestions(input: string): string[] {
-  const trimmed = input.trim().toLowerCase();
-  if (!trimmed) return COMMANDS;
-  return COMMANDS.filter((cmd) => cmd.startsWith(trimmed));
-}
