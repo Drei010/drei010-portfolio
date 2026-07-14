@@ -8,7 +8,6 @@ const features = [
   "AI-powered responses",
   "Tab completion",
   "Command history",
-  "Orange-on-black hacker aesthetic",
 ];
 
 export function CliFeatureCard() {
@@ -69,8 +68,7 @@ export function CliFeatureCard() {
 
       {/* Description */}
       <p className="mb-4 text-sm leading-relaxed text-muted">
-        Explore my portfolio through an interactive terminal with a hacker
-        aesthetic.
+        Your terminal is ready. Type commands, explore my work, and discover who I am one command at a time.
       </p>
 
       {/* Feature list */}

@@ -8,8 +8,30 @@ import { executeCommand } from "@/lib/cli/commands";
 import { useCommandHistory } from "@/lib/cli/history";
 import { getCompletion } from "@/lib/cli/autocomplete";
 import { useView } from "@/lib/view-context";
+import { ASCII_ART } from "@/lib/data/ascii-art";
+
+const ASCII_ART_LINES: TerminalLine[] = ASCII_ART
+  .split("\n")
+  .filter((line) => line.length > 0)
+  .map((line, i) => ({
+    id: `ascii-${i}`,
+    centered: true,
+    segments: [{ text: line, color: "primary" as const }],
+  }));
 
 const WELCOME_LINES: TerminalLine[] = [
+
+  ...ASCII_ART_LINES,
+
+  {
+
+    id: "welcome-0",
+
+    centered: true,
+
+    segments: [{ text: "" }],
+
+  },
 
   {
 
