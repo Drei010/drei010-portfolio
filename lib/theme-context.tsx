@@ -18,6 +18,7 @@ type ThemeContextValue = {
   theme: ThemeMode;
   toggleTheme: () => void;
   setTheme: (mode: ThemeMode) => void;
+  mounted: boolean;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -46,6 +47,12 @@ function getStoredTheme(): ThemeMode | null {
   return null;
 }
 
+function getResolvedTheme(): ThemeMode {
+  const stored = getStoredTheme();
+  if (stored) return stored;
+  return getTimezoneDefault();
+}
+
 function persistTheme(mode: ThemeMode): void {
   try {
     localStorage.setItem(STORAGE_KEY, mode);
@@ -61,15 +68,21 @@ function applyThemeClass(mode: ThemeMode): void {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  // On the server, default to "light". On the client, the lazy initializer
+  // reads from localStorage — the same source as the inline script in layout.tsx.
+  // This ensures React's initial state matches the DOM the script already set.
   const [theme, setThemeState] = useState<ThemeMode>(() => {
-    const stored = getStoredTheme();
-    if (stored) return stored;
-    return getTimezoneDefault();
+    if (typeof window === "undefined") return "light";
+    return getResolvedTheme();
   });
+
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     applyThemeClass(theme);
-    // Enable transitions after initial theme is applied
+    requestAnimationFrame(() => {
+      setMounted(true);
+    });
     const timer = setTimeout(() => {
       document.documentElement.classList.remove("no-transition");
     }, 50);
@@ -96,7 +109,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, mounted }}>
       {children}
     </ThemeContext.Provider>
   );

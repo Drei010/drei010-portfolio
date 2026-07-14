@@ -4,12 +4,14 @@ import { useTheme } from "@/lib/theme-context";
 import { useView } from "@/lib/view-context";
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, mounted } = useTheme();
   const { view } = useView();
 
   if (view === "cli") return null;
 
-  const isDark = theme === "dark";
+  // Before mount, render the "light" state to match server HTML.
+  // After mount, use the real theme value.
+  const isDark = mounted ? theme === "dark" : false;
 
   return (
     <button

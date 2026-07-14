@@ -109,6 +109,7 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
   const { theme } = useTheme();
   const opacityScale = theme === "light" ? LIGHT_MODE_OPACITY_SCALE : 1;
   const opacityScaleRef = useRef(opacityScale);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
     opacityScaleRef.current = opacityScale;
@@ -123,6 +124,10 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
     const rect = canvas.getBoundingClientRect();
     const newWidth = rect.width;
     const newHeight = rect.height;
+
+    if (newWidth === 0 || newHeight === 0) {
+      return { newWidth: 0, newHeight: 0 };
+    }
 
     canvas.width = newWidth * dpr;
     canvas.height = newHeight * dpr;
@@ -241,11 +246,53 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
     };
     pointerQuery.addEventListener("change", handlePointerChange);
 
-    const { newWidth, newHeight } = syncCanvasSize(canvas);
-    nodesRef.current = createNodes(newWidth, newHeight);
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    const initializeCanvas = () => {
+      const { newWidth, newHeight } = syncCanvasSize(canvas);
+      if (newWidth > 0 && newHeight > 0 && !initializedRef.current) {
+        initializedRef.current = true;
+        nodesRef.current = createNodes(newWidth, newHeight);
+      }
+    };
+
+    // Try to initialize immediately
+    initializeCanvas();
+
+    // Use ResizeObserver to handle cases where canvas has zero dimensions
+    // on initial mount (e.g., during page refresh before layout is computed)
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          if (!initializedRef.current) {
+            initializeCanvas();
+          } else {
+            // Handle resize after initialization
+            const prevWidth = sizeRef.current.width;
+            const prevHeight = sizeRef.current.height;
+            const { newWidth, newHeight } = syncCanvasSize(canvas);
+
+            if (newWidth > 0 && newHeight > 0 && prevWidth > 0 && prevHeight > 0) {
+              const scaleX = newWidth / prevWidth;
+              const scaleY = newHeight / prevHeight;
+
+              for (const node of nodesRef.current) {
+                node.x *= scaleX;
+                node.y *= scaleY;
+                node.x = Math.max(0, Math.min(newWidth, node.x));
+                node.y = Math.max(0, Math.min(newHeight, node.y));
+              }
+            } else if (newWidth > 0 && newHeight > 0) {
+              nodesRef.current = createNodes(newWidth, newHeight);
+            }
+          }
+        }
+      }
+    });
+
+    resizeObserver.observe(canvas);
 
     const animate = () => {
       draw(ctx);
@@ -270,46 +317,13 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
     window.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseleave", handleMouseLeave);
 
-    let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
-    let prevResizeWidth = sizeRef.current.width;
-    let prevResizeHeight = sizeRef.current.height;
-
-    const handleResize = () => {
-      // Immediately sync canvas buffer to avoid stretching
-      const { newWidth, newHeight } = syncCanvasSize(canvas);
-
-      // Debounce the node repositioning to avoid thrashing on drag-resize
-      if (resizeTimeout) clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        if (prevResizeWidth === 0 || prevResizeHeight === 0) {
-          nodesRef.current = createNodes(newWidth, newHeight);
-        } else {
-          const scaleX = newWidth / prevResizeWidth;
-          const scaleY = newHeight / prevResizeHeight;
-
-          for (const node of nodesRef.current) {
-            node.x *= scaleX;
-            node.y *= scaleY;
-
-            node.x = Math.max(0, Math.min(newWidth, node.x));
-            node.y = Math.max(0, Math.min(newHeight, node.y));
-          }
-        }
-
-        prevResizeWidth = newWidth;
-        prevResizeHeight = newHeight;
-      }, 100);
-    };
-
-    window.addEventListener("resize", handleResize);
-
     return () => {
       cancelAnimationFrame(animationFrameRef.current);
       window.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseleave", handleMouseLeave);
-      window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
       pointerQuery.removeEventListener("change", handlePointerChange);
-      if (resizeTimeout) clearTimeout(resizeTimeout);
+      initializedRef.current = false;
     };
   }, [syncCanvasSize, draw]);
 

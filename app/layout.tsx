@@ -51,19 +51,22 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
       </head>
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <ThemeProvider>
           <ViewProvider>
             <Header />
-            <main className="flex flex-1 flex-col" role="main">
+            <main className="flex flex-1 flex-col">
               {children}
             </main>
           </ViewProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
-      <Analytics />
     </html>
   );
 }

@@ -8,12 +8,16 @@ import { useTheme } from "@/lib/theme-context";
 
 export function Header() {
   const { view } = useView();
-  const { theme } = useTheme();
+  const { theme, mounted } = useTheme();
 
-  const logoSrc = view === "cli" || theme === "dark" ? "/1.svg" : "/2.svg";
+  // Use light logo (/2.svg) as default for SSR to match the server-rendered HTML.
+  // After mount, switch to the correct logo based on theme/view.
+  const logoSrc = mounted
+    ? (view === "cli" || theme === "dark" ? "/1.svg" : "/2.svg")
+    : "/2.svg";
 
   return (
-    <header className={`sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm ${view === "cli" ? "dark" : ""}`}>
+    <header className={`sticky top-0 z-50 border-b ${view === "cli" ? "dark border-[#2a2a2a] bg-[#0a0a0a] text-[#ededed]" : "border-border bg-white backdrop-blur-sm dark:bg-background/80"}`}>
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         <a href="#about" className="flex items-center">
           <Image
@@ -23,6 +27,7 @@ export function Header() {
             height={32}
             className="h-12 w-auto"
             priority
+            suppressHydrationWarning
           />
         </a>
 
