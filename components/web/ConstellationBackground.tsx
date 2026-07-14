@@ -105,6 +105,7 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
   });
   const hasPointerRef = useRef<boolean>(false);
   const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotionRef = useRef(shouldReduceMotion);
   const { theme } = useTheme();
   const opacityScale = theme === "light" ? LIGHT_MODE_OPACITY_SCALE : 1;
   const opacityScaleRef = useRef(opacityScale);
@@ -112,6 +113,10 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
   useEffect(() => {
     opacityScaleRef.current = opacityScale;
   }, [opacityScale]);
+
+  useEffect(() => {
+    shouldReduceMotionRef.current = shouldReduceMotion;
+  }, [shouldReduceMotion]);
 
   const syncCanvasSize = useCallback((canvas: HTMLCanvasElement) => {
     const dpr = window.devicePixelRatio || 1;
@@ -138,12 +143,13 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
       if (width === 0 || height === 0) return;
 
       const scale = opacityScaleRef.current;
+      const reduceMotion = shouldReduceMotionRef.current;
 
       ctx.clearRect(0, 0, width, height);
 
       const nodes = nodesRef.current;
 
-      if (!shouldReduceMotion) {
+      if (!reduceMotion) {
         for (const node of nodes) {
           node.x += node.vx;
           node.y += node.vy;
@@ -220,7 +226,7 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
         ctx.fill();
       }
     },
-    [shouldReduceMotion]
+    []
   );
 
   useEffect(() => {
@@ -240,13 +246,6 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    if (shouldReduceMotion) {
-      draw(ctx);
-      return () => {
-        pointerQuery.removeEventListener("change", handlePointerChange);
-      };
-    }
 
     const animate = () => {
       draw(ctx);
@@ -312,7 +311,7 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
       pointerQuery.removeEventListener("change", handlePointerChange);
       if (resizeTimeout) clearTimeout(resizeTimeout);
     };
-  }, [shouldReduceMotion, syncCanvasSize, draw]);
+  }, [syncCanvasSize, draw]);
 
   return (
     <canvas
