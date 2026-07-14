@@ -8,137 +8,78 @@ import { executeCommand } from "@/lib/cli/commands";
 import { useCommandHistory } from "@/lib/cli/history";
 import { getCompletion } from "@/lib/cli/autocomplete";
 import { useView } from "@/lib/view-context";
-import { ASCII_ART } from "@/lib/data/ascii-art";
+import { ASCII_ART, ASCII_ART_MOBILE } from "@/lib/data/ascii-art";
 
-const ASCII_ART_LINES: TerminalLine[] = ASCII_ART
-  .split("\n")
-  .filter((line) => line.length > 0)
-  .map((line, i) => ({
-    id: `ascii-${i}`,
-    centered: true,
-    segments: [{ text: line, color: "primary" as const }],
-  }));
+function buildAsciiLines(art: string): TerminalLine[] {
+  return art
+    .split("\n")
+    .filter((line) => line.length > 0)
+    .map((line, i) => ({
+      id: `ascii-${i}`,
+      centered: true,
+      segments: [{ text: line, color: "primary" as const }],
+    }));
+}
 
-const WELCOME_LINES: TerminalLine[] = [
+const DESKTOP_ASCII_LINES = buildAsciiLines(ASCII_ART);
+const MOBILE_ASCII_LINES = buildAsciiLines(ASCII_ART_MOBILE);
 
-  ...ASCII_ART_LINES,
-
-  {
-
-    id: "welcome-0",
-
-    centered: true,
-
-    segments: [{ text: "" }],
-
-  },
-
-  {
-
-    id: "welcome-1",
-
-    centered: true,
-
-    segments: [
-
-      { text: "╔══════════════════════════════════════╗", color: "primary" },
-
-    ],
-
-  },
-
-  {
-
-    id: "welcome-2",
-
-    centered: true,
-
-    segments: [
-
-      { text: "║  ", color: "primary" },
-
-      { text: "andrei@portfolio", color: "prompt" },
-
-      { text: " ~ ", color: "dim" },
-
-      { text: "v1.0.0", color: "muted" },
-
-      { text: "       ║", color: "primary" },
-
-    ],
-
-  },
-
-  {
-
-    id: "welcome-3",
-
-    centered: true,
-
-    segments: [
-
-      { text: "╚══════════════════════════════════════╝", color: "primary" },
-
-    ],
-
-  },
-
-  {
-
-    id: "welcome-4",
-
-    centered: true,
-
-    segments: [{ text: "" }],
-
-  },
-
-  {
-
-    id: "welcome-5",
-
-    centered: true,
-
-    segments: [
-
-      { text: "Welcome to my interactive portfolio.", color: "default" },
-
-    ],
-
-  },
-
-  {
-
-    id: "welcome-6",
-
-    centered: true,
-
-    segments: [
-
-      { text: "Type ", color: "muted" },
-
-      { text: "help", color: "primary" },
-
-      { text: " to see available commands.", color: "muted" },
-
-    ],
-
-  },
-
-  {
-
-    id: "welcome-7",
-
-    centered: true,
-
-    segments: [{ text: "" }],
-
-  },
-
-];
+function getWelcomeLines(isMobile: boolean): TerminalLine[] {
+  const asciiLines = isMobile ? MOBILE_ASCII_LINES : DESKTOP_ASCII_LINES;
+  return [
+    ...asciiLines,
+    { id: "welcome-0", centered: true, segments: [{ text: "" }] },
+    {
+      id: "welcome-1",
+      centered: true,
+      segments: [
+        { text: "╔══════════════════════════════════════╗", color: "primary" },
+      ],
+    },
+    {
+      id: "welcome-2",
+      centered: true,
+      segments: [
+        { text: "║  ", color: "primary" },
+        { text: "andrei@portfolio", color: "prompt" },
+        { text: " ~ ", color: "dim" },
+        { text: "v1.0.0", color: "muted" },
+        { text: "       ║", color: "primary" },
+      ],
+    },
+    {
+      id: "welcome-3",
+      centered: true,
+      segments: [
+        { text: "╚══════════════════════════════════════╝", color: "primary" },
+      ],
+    },
+    { id: "welcome-4", centered: true, segments: [{ text: "" }] },
+    {
+      id: "welcome-5",
+      centered: true,
+      segments: [
+        { text: "Welcome to my interactive portfolio.", color: "default" },
+      ],
+    },
+    {
+      id: "welcome-6",
+      centered: true,
+      segments: [
+        { text: "Type ", color: "muted" },
+        { text: "help", color: "primary" },
+        { text: " to see available commands.", color: "muted" },
+      ],
+    },
+    { id: "welcome-7", centered: true, segments: [{ text: "" }] },
+  ];
+}
 
 export function Terminal() {
-  const [lines, setLines] = useState<TerminalLine[]>(WELCOME_LINES);
+  const [lines, setLines] = useState<TerminalLine[]>(() => {
+    const mobile = typeof window !== "undefined" && window.innerWidth < 640;
+    return getWelcomeLines(mobile);
+  });
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const { setView } = useView();
