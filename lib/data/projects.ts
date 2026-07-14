@@ -36,7 +36,7 @@ export const projectsData: Project[] = [
     title: "Developer Portfolio",
     description:
       "This portfolio site — a dual-view experience with a minimalist web interface and an interactive CLI terminal.",
-    thumbnail: "/projects/portfolio.png",
+    thumbnail: "/Drei010-resume-cli.png",
     techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
     repoUrl: "https://github.com/Drei010/drei010-portfolio",
   },
