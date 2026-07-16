@@ -56,11 +56,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeScript }}
         />
       </head>
-      <body className="flex min-h-full flex-col bg-background text-foreground">
+      <body className="flex h-full flex-col bg-background text-foreground">
         <ThemeProvider>
           <ViewProvider>
             <Header />
-            <main className="flex flex-1 flex-col">
+            <main className="flex min-h-0 flex-1 flex-col">
               {children}
             </main>
           </ViewProvider>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { ViewToggle } from "@/components/ViewToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GameToggle } from "@/components/GameToggle";
 import { useView } from "@/lib/view-context";
 import { useTheme } from "@/lib/theme-context";
 
@@ -34,6 +35,7 @@ export function Header() {
         <div className="flex items-center">
           <ThemeToggle />
           <ViewToggle />
+          <GameToggle />
         </div>
       </div>
     </header>
