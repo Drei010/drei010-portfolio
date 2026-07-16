@@ -2,36 +2,33 @@ import Matter from "matter-js";
 import { TerrainChunk, TerrainState } from "./types";
 
 const CHUNK_WIDTH = 800;
-const SEGMENT_WIDTH = 40;
+const SEGMENT_WIDTH = 30;
 const BASE_HEIGHT = 550;
 const TERRAIN_DEPTH = 200;
 const DIFFICULTY_INTERVAL = 7000; // 700m in world pixels
 
 function getDifficultyMultiplier(x: number): number {
-  // Difficulty increases every 7000px (700m)
-  // Starts at 1.0, increases by 0.25 each interval, capped at 3.0
   const level = Math.floor(Math.max(0, x - 600) / DIFFICULTY_INTERVAL);
   return Math.min(1.0 + level * 0.25, 3.0);
 }
 
 function getFrequencyMultiplier(x: number): number {
-  // Frequency slightly increases for steeper/tighter hills
   const level = Math.floor(Math.max(0, x - 600) / DIFFICULTY_INTERVAL);
-  return 1.0 + level * 0.1;
+  return 1.0 + level * 0.08;
 }
 
 function noise(x: number, seed: number): number {
   const difficulty = getDifficultyMultiplier(x);
   const freq = getFrequencyMultiplier(x);
-  const layer1 = Math.sin(x * 0.005 * freq + seed) * 40 * difficulty;
-  const layer2 = Math.sin(x * 0.012 * freq + seed * 2.3) * 20 * difficulty;
-  const layer3 = Math.sin(x * 0.025 * freq + seed * 0.7) * 10 * difficulty;
-  const layer4 = Math.sin(x * 0.05 * freq + seed * 1.5) * 5 * difficulty;
-  return layer1 + layer2 + layer3 + layer4;
+  // Only low and mid frequency layers for smooth hills
+  const layer1 = Math.sin(x * 0.004 * freq + seed) * 45 * difficulty;
+  const layer2 = Math.sin(x * 0.009 * freq + seed * 2.3) * 22 * difficulty;
+  const layer3 = Math.sin(x * 0.016 * freq + seed * 0.7) * 10 * difficulty;
+  return layer1 + layer2 + layer3;
 }
 
 function getTerrainHeight(x: number, seed: number): number {
-  // Completely flat starting zone from x=0 to x=400
+  // Completely flat starting zone from any negative X up to x=400
   if (x < 400) {
     return BASE_HEIGHT;
   }
@@ -47,7 +44,7 @@ function getTerrainHeight(x: number, seed: number): number {
 export function createTerrainState(): TerrainState {
   return {
     chunks: [],
-    lastGeneratedX: -CHUNK_WIDTH,
+    lastGeneratedX: -CHUNK_WIDTH * 2,
     seed: Math.random() * 1000,
   };
 }
