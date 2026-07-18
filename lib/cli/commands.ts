@@ -4,7 +4,7 @@ import { skillsData } from "@/lib/data/skills";
 import { projectsData } from "@/lib/data/projects";
 import { contactData } from "@/lib/data/contact";
 import { servicesData } from "@/lib/data/services";
-import { queryAI } from "@/lib/cli/ai-adapter";
+import { findPreparedAnswer } from "@/lib/cli/ai-adapter";
 
 function parseCommand(input: string): { name: string; args: string[] } {
   const parts = input.trim().split(/\s+/);
@@ -25,6 +25,27 @@ function makeLine(
       ? [{ text: input, color: color ?? "default" }]
       : input,
   };
+}
+
+function makeChatResult(question: string): CommandResult {
+  const preparedAnswer = findPreparedAnswer(question);
+  if (!preparedAnswer) {
+    return { lines: [], chatRequest: { question } };
+  }
+
+  return {
+    lines: [
+      makeLine(""),
+      makeLine([{ text: preparedAnswer.response, color: "default" }]),
+      makeLine(""),
+    ],
+    chatExchange: { question, answer: preparedAnswer.response },
+  };
+}
+
+export function isConversationalInput(input: string): boolean {
+  const trimmed = input.trim();
+  return trimmed.split(/\s+/).length > 1 || /[?？]$/.test(trimmed);
 }
 
 type CommandHandler = (args: string[]) => CommandResult | Promise<CommandResult>;
@@ -63,7 +84,15 @@ const commands: Record<string, CommandHandler> = {
       ]),
       makeLine([
         { text: "  ask <query> ", color: "prompt" },
-        { text: "Ask me anything", color: "muted" },
+        { text: "Ask a portfolio question", color: "muted" },
+      ]),
+      makeLine([
+        { text: "  <question>  ", color: "prompt" },
+        { text: "Ask naturally without the ask command", color: "muted" },
+      ]),
+      makeLine([
+        { text: "  Ctrl+C / Esc", color: "prompt" },
+        { text: "  Cancel a streaming response", color: "muted" },
       ]),
       makeLine([
         { text: "  theme       ", color: "prompt" },
@@ -71,7 +100,7 @@ const commands: Record<string, CommandHandler> = {
       ]),
       makeLine([
         { text: "  clear       ", color: "prompt" },
-        { text: "Clear the terminal", color: "muted" },
+        { text: "Clear terminal and chat history", color: "muted" },
       ]),
       makeLine(""),
     ],
@@ -207,7 +236,7 @@ const commands: Record<string, CommandHandler> = {
     switchView: "web" as const,
   }),
 
-  ask: async (args: string[]) => {
+  ask: (args: string[]) => {
     const question = args.join(" ");
     if (!question) {
       return {
@@ -221,14 +250,8 @@ const commands: Record<string, CommandHandler> = {
         ],
       };
     }
-    const response = await queryAI(question);
-    return {
-      lines: [
-        makeLine(""),
-        makeLine([{ text: response, color: "default" }]),
-        makeLine(""),
-      ],
-    };
+
+    return makeChatResult(question);
   },
 };
 
@@ -237,6 +260,10 @@ export async function executeCommand(input: string): Promise<CommandResult> {
 
   const handler = commands[name];
   if (!handler) {
+    if (findPreparedAnswer(input) || isConversationalInput(input)) {
+      return makeChatResult(input);
+    }
+
     return {
       lines: [
         makeLine(""),

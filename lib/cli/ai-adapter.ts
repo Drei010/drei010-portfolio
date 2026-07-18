@@ -1,44 +1,82 @@
-import { contactData } from "@/lib/data/contact";
+import {
+  preparedAnswers,
+  type PreparedAnswerDefinition,
+} from "@/lib/data/cli-answers";
 
-const responses: Array<{ keywords: string[]; response: string }> = [
-  {
-    keywords: ["tech", "stack", "use", "technology", "tools"],
-    response:
-      "I primarily work with TypeScript, React, Next.js, and Node.js. For styling I use Tailwind CSS. On the backend, I work with Python, PostgreSQL, and AWS services. I'm also experienced with Docker, CI/CD pipelines, and system design.",
-  },
-  {
-    keywords: ["project", "work", "built", "build", "portfolio"],
-    response:
-      "I've built e-commerce platforms, AI chat applications, task management systems, and this interactive portfolio. Type 'projects' to see the full list with details.",
-  },
-  {
-    keywords: ["contact", "hire", "email", "reach", "available"],
-    response: `I'm open to opportunities! You can reach me at ${contactData.email}${
-      contactData.links.length > 0
-        ? ` or find me on ${contactData.links.map((link) => link.platform).join(" and ")}`
-        : ""
-    }. Type 'contact' for all my links.`,
-  },
-  {
-    keywords: ["hello", "hi", "hey", "who", "name", "about"],
-    response:
-      "Hey! I'm Andrei Kyle Hidalgo, a full-stack developer based in the Philippines. I build modern web apps with a focus on clean architecture and great UX. Type 'about' for more.",
-  },
-  {
-    keywords: ["skill", "good", "best", "strength"],
-    response:
-      "My strengths are in TypeScript/React for frontend, Node.js/Python for backend, and AWS for infrastructure. I enjoy building scalable systems and mentoring others. Type 'skills' for the complete list.",
-  },
-];
+export type PreparedAnswerMatch = {
+  id: string;
+  response: string;
+};
 
-export async function queryAI(input: string): Promise<string> {
-  const lower = input.toLowerCase();
+type ScoredAnswer = {
+  answer: PreparedAnswerDefinition;
+  index: number;
+  score: number;
+};
 
-  for (const entry of responses) {
-    if (entry.keywords.some((kw) => lower.includes(kw))) {
-      return entry.response;
+export function normalizeQuestion(input: string): string {
+  return input
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function scoreAnswer(
+  normalizedInput: string,
+  inputTokens: ReadonlySet<string>,
+  answer: PreparedAnswerDefinition,
+  index: number
+): ScoredAnswer | null {
+  const exactAlias = answer.aliases.some(
+    (alias) => normalizeQuestion(alias) === normalizedInput
+  );
+
+  if (exactAlias) {
+    return { answer, index, score: 10_000 + answer.priority };
+  }
+
+  if (answer.keywords.length === 0) return null;
+
+  const keywordMatches = answer.keywords.reduce(
+    (count, keyword) => count + Number(inputTokens.has(normalizeQuestion(keyword))),
+    0
+  );
+
+  if (keywordMatches < answer.minimumKeywordMatches) return null;
+
+  return {
+    answer,
+    index,
+    score: keywordMatches * 100 + answer.priority,
+  };
+}
+
+export function findPreparedAnswer(input: string): PreparedAnswerMatch | null {
+  const normalizedInput = normalizeQuestion(input);
+  if (!normalizedInput) return null;
+
+  const inputTokens = new Set(normalizedInput.split(" "));
+  let bestMatch: ScoredAnswer | null = null;
+
+  for (const [index, answer] of preparedAnswers.entries()) {
+    const candidate = scoreAnswer(normalizedInput, inputTokens, answer, index);
+    if (!candidate) continue;
+
+    if (
+      !bestMatch ||
+      candidate.score > bestMatch.score ||
+      (candidate.score === bestMatch.score && candidate.index < bestMatch.index)
+    ) {
+      bestMatch = candidate;
     }
   }
 
-  return "I don't have a specific answer for that yet. Try asking about my tech stack, projects, or how to contact me. Or type 'help' to see all commands.";
+  if (bestMatch === null) return null;
+  return {
+    id: bestMatch.answer.id,
+    response: bestMatch.answer.response,
+  };
 }

@@ -45,13 +45,28 @@ test("keeps CLI autocomplete deterministic", () => {
   assert.equal(autocomplete.getCompletion("unknown"), null);
 });
 
-test("derives CLI contact answers from canonical contact data", async () => {
-  const response = await ai.queryAI("How can I contact you?");
-  assert.ok(response.includes(contactData.email));
+test("normalizes prepared-answer questions deterministically", () => {
+  assert.equal(
+    ai.normalizeQuestion("  WHAT’S   your Tech-Stack?!  "),
+    "what s your tech stack"
+  );
+});
+
+test("matches prepared answers without substring false positives", () => {
+  assert.equal(ai.findPreparedAnswer("hello")?.id, "introduction");
+  assert.equal(ai.findPreparedAnswer("What is your technology stack?")?.id, "technology");
+  assert.equal(ai.findPreparedAnswer("this should not match hi"), null);
+  assert.equal(ai.findPreparedAnswer("What is the weather today?"), null);
+});
+
+test("derives CLI contact answers from canonical contact data", () => {
+  const match = ai.findPreparedAnswer("How can I contact you?");
+  assert.ok(match);
+  assert.ok(match.response.includes(contactData.email));
   for (const link of contactData.links) {
-    assert.ok(response.includes(link.platform));
+    assert.ok(match.response.includes(link.platform));
   }
-  assert.equal(response.includes("hello@andreikyle.dev"), false);
+  assert.equal(match.response.includes("hello@andreikyle.dev"), false);
 });
 
 test("keeps canonical vehicle performance values and total mass", () => {
