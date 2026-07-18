@@ -9,6 +9,7 @@ const WHEEL_OFFSET_Y = 20;
 const MAX_SPEED = 14;
 const DRIVE_FORCE = 0.07;
 const BRAKE_FORCE = 0.05;
+const ROTATIONAL_STABILITY_MULTIPLIER = 1.35;
 
 export function createVehicle(x: number, y: number): VehicleState {
   const chassis = Matter.Bodies.rectangle(x, y, CHASSIS_WIDTH, CHASSIS_HEIGHT, {
@@ -40,6 +41,7 @@ export function createVehicle(x: number, y: number): VehicleState {
   });
 
   Matter.Body.setMass(body, 30);
+  Matter.Body.setInertia(body, body.inertia * ROTATIONAL_STABILITY_MULTIPLIER);
   Matter.Body.setPosition(body, { x, y });
 
   return {

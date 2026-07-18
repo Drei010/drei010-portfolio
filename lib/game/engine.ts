@@ -15,6 +15,7 @@ import {
 } from "./collectibles";
 import { renderCollectibles } from "./collectibles-renderer";
 import { createCloudInfo, updateCloudInfos, renderCloudInfos } from "./cloud-info";
+import { drawPixelText, measurePixelText } from "./pixel-text";
 
 const VEHICLE_START_X = 100;
 const VEHICLE_START_Y = 509;
@@ -153,7 +154,7 @@ export function renderGame(
 
   // Show instructions as static hero text in the clouds before game starts
   if (!state.started) {
-    renderInstructions(ctx, canvasWidth, canvasHeight);
+    renderInstructions(ctx, canvasWidth, canvasHeight, time);
   }
 
   // Apply camera transform for world-space rendering
@@ -172,63 +173,130 @@ export function renderGame(
   resetCameraTransform(ctx);
 }
 
+function fillSteppedPanel(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  step: number,
+  color: string
+): void {
+  ctx.fillStyle = color;
+  ctx.fillRect(x + step, y, width - step * 2, height);
+  ctx.fillRect(x, y + step, width, height - step * 2);
+}
+
 function renderInstructions(
   ctx: CanvasRenderingContext2D,
   canvasWidth: number,
-  canvasHeight: number
+  canvasHeight: number,
+  time: number
 ): void {
-  const centerX = canvasWidth / 2;
-  const centerY = canvasHeight * 0.35;
+  const compact = canvasHeight < 430;
+  const panelWidth = Math.min(720, canvasWidth - 24);
+  const panelHeight = Math.min(compact ? 190 : 232, canvasHeight - 24);
+  const centerX = Math.round(canvasWidth / 2);
+  const centerY = Math.round(
+    Math.max(panelHeight / 2 + 12, canvasHeight * (compact ? 0.35 : 0.34))
+  );
+  const panelLeft = Math.round(centerX - panelWidth / 2);
+  const panelTop = Math.round(centerY - panelHeight / 2);
+  const panelStep = 8;
+  const titleWidthAtUnitScale = measurePixelText("HILL ROLL", 1);
+  const pixelScale = Math.max(
+    2,
+    Math.min(compact ? 6 : 7, Math.floor((panelWidth - 48) / titleWidthAtUnitScale))
+  );
+  const lineHeight = 7 * pixelScale;
+  const titleTop = panelTop + (compact ? 18 : 30);
+  const secondLineTop = titleTop + lineHeight + pixelScale;
+  const subtitleY = secondLineTop + lineHeight + (compact ? 13 : 18);
+  const controlsY = subtitleY + (compact ? 23 : 28);
+  const promptY = controlsY + (compact ? 22 : 28);
 
   ctx.save();
+  ctx.imageSmoothingEnabled = false;
+
+  fillSteppedPanel(
+    ctx,
+    panelLeft + 7,
+    panelTop + 7,
+    panelWidth,
+    panelHeight,
+    panelStep,
+    "rgba(0, 0, 0, 0.35)"
+  );
+  fillSteppedPanel(
+    ctx,
+    panelLeft,
+    panelTop,
+    panelWidth,
+    panelHeight,
+    panelStep,
+    "#f97316"
+  );
+  fillSteppedPanel(
+    ctx,
+    panelLeft + 3,
+    panelTop + 3,
+    panelWidth - 6,
+    panelHeight - 6,
+    panelStep - 3,
+    "rgba(13, 13, 13, 0.92)"
+  );
+
+  ctx.fillStyle = "#fb923c";
+  ctx.fillRect(panelLeft + 14, panelTop + 14, 5, 5);
+  ctx.fillRect(panelLeft + panelWidth - 19, panelTop + 14, 5, 5);
+  ctx.fillRect(panelLeft + 14, panelTop + panelHeight - 19, 5, 5);
+  ctx.fillRect(panelLeft + panelWidth - 19, panelTop + panelHeight - 19, 5, 5);
+
+  if (!compact) {
+    ctx.font = "bold 10px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#a3541a";
+    ctx.fillText("// GAME MODE 01 //", centerX, panelTop + 15);
+  }
+
+  for (const [line, top] of [
+    ["HILL ROLL", titleTop],
+    ["PORTFOLIO", secondLineTop],
+  ] as const) {
+    drawPixelText(
+      ctx,
+      line,
+      centerX + pixelScale * 2,
+      top + pixelScale * 2,
+      pixelScale,
+      "#090909"
+    );
+    drawPixelText(
+      ctx,
+      line,
+      centerX + pixelScale,
+      top + pixelScale,
+      pixelScale,
+      "#9a3412"
+    );
+    drawPixelText(ctx, line, centerX, top, pixelScale, "#f97316");
+  }
+
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+  ctx.font = `bold ${compact ? 12 : 14}px monospace`;
+  ctx.fillStyle = "#ededed";
+  ctx.fillText("DRIVE · COLLECT · EXPLORE THE PORTFOLIO", centerX, subtitleY);
 
-  // Dark backdrop behind text for contrast
-  ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-  ctx.beginPath();
-  ctx.roundRect(centerX - 320, centerY - 80, 640, 180, 16);
-  ctx.fill();
-
-  // Main title - pixelated style with orange color and dark stroke
-  ctx.font = "bold 52px 'Courier New', Courier, monospace";
-  ctx.strokeStyle = "#1a1a1a";
-  ctx.lineWidth = 5;
-  ctx.strokeText("HILL CLIMB PORTFOLIO", centerX, centerY - 35);
+  ctx.font = `bold ${compact ? 13 : 15}px monospace`;
   ctx.fillStyle = "#f97316";
-  ctx.fillText("HILL CLIMB PORTFOLIO", centerX, centerY - 35);
+  ctx.fillText("←  BRAKE       GAS  →", centerX, controlsY);
 
-  // Orange glow on title
-  ctx.shadowColor = "#f97316";
-  ctx.shadowBlur = 15;
-  ctx.fillText("HILL CLIMB PORTFOLIO", centerX, centerY - 35);
-  ctx.shadowBlur = 0;
-  ctx.shadowColor = "transparent";
-
-  // Subtitle - white with dark outline
-  ctx.font = "bold 18px 'Courier New', Courier, monospace";
-  ctx.strokeStyle = "#1a1a1a";
-  ctx.lineWidth = 4;
-  ctx.strokeText("Drive over hills & collect items to explore the portfolio", centerX, centerY + 20);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("Drive over hills & collect items to explore the portfolio", centerX, centerY + 20);
-
-  // Controls - orange accented
-  ctx.font = "bold 20px 'Courier New', Courier, monospace";
-  ctx.strokeStyle = "#1a1a1a";
-  ctx.lineWidth = 4;
-  ctx.strokeText("←  BRAKE        →  GAS", centerX, centerY + 60);
-  ctx.fillStyle = "#ea580c";
-  ctx.fillText("←  BRAKE        →  GAS", centerX, centerY + 60);
-
-  // "Press to start" blinking effect
-  ctx.globalAlpha = 0.6 + Math.sin(Date.now() * 0.005) * 0.4;
-  ctx.font = "14px 'Courier New', Courier, monospace";
-  ctx.strokeStyle = "#1a1a1a";
-  ctx.lineWidth = 3;
-  ctx.strokeText("Press any control to start", centerX, centerY + 95);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("Press any control to start", centerX, centerY + 95);
+  ctx.globalAlpha = 0.65 + Math.sin(time * 0.005) * 0.35;
+  ctx.font = `bold ${compact ? 10 : 12}px monospace`;
+  ctx.fillStyle = "#fb923c";
+  ctx.fillText("[ PRESS ANY CONTROL TO START ]", centerX, promptY);
 
   ctx.restore();
 }
