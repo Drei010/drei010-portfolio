@@ -24,9 +24,10 @@ import {
 import { renderCollectibles } from "./collectibles-renderer";
 import { createCloudInfo, updateCloudInfos, renderCloudInfos } from "./cloud-info";
 import { drawPixelText, measurePixelText } from "./pixel-text";
+import { GAME_START_POSITION } from "./config";
 
-const VEHICLE_START_X = 100;
-const VEHICLE_START_Y = 509;
+const VEHICLE_START_X = GAME_START_POSITION.x;
+const VEHICLE_START_Y = GAME_START_POSITION.y;
 
 export function initGameState(): GameState {
   const engine = Matter.Engine.create({

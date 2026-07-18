@@ -72,6 +72,7 @@ export function createCollectibleState(): CollectibleState {
   return {
     items: [],
     collectedCount: 0,
+    collectedDataIndices: [],
     totalSpawned: 0,
     lastSpawnX: 200,
   };
@@ -85,48 +86,52 @@ export function spawnCollectibles(
   world: Matter.World
 ): CollectibleState {
   const spawnAhead = cameraX + canvasWidth * 2;
-
   if (state.lastSpawnX >= spawnAhead) return state;
 
   let { items, totalSpawned, lastSpawnX } = state;
   const allItems = getItems();
+  const collectedIndices = new Set(state.collectedDataIndices);
+  const activeIndices = new Set(items.map((item) => item.dataIndex));
   let modified = false;
 
   while (lastSpawnX < spawnAhead) {
-    lastSpawnX += SPAWN_INTERVAL;
-    const dataIndex = totalSpawned % allItems.length;
-    const item = allItems[dataIndex];
+    const dataIndex = allItems.findIndex(
+      (_, index) => !collectedIndices.has(index) && !activeIndices.has(index)
+    );
+    if (dataIndex === -1) break;
 
+    lastSpawnX = Math.max(lastSpawnX + SPAWN_INTERVAL, cameraX + canvasWidth);
+    const item = allItems[dataIndex];
     const terrainY = getTerrainHeightAtX(lastSpawnX, terrainSeed);
     const y = terrainY - FLOAT_OFFSET;
-
+    const id = `collectible-${dataIndex}-${totalSpawned}`;
     const body = Matter.Bodies.circle(lastSpawnX, y, COLLECTIBLE_SIZE, {
       isSensor: true,
       isStatic: true,
-      label: `collectible-${totalSpawned}`,
+      label: id,
     });
 
     Matter.Composite.add(world, body);
-
-    const collectible: Collectible = {
-      id: `collectible-${totalSpawned}`,
-      body,
-      type: item.type,
-      dataIndex,
-      collected: false,
-      x: lastSpawnX,
-      y,
-    };
-
-    items = [...items, collectible];
+    items = [
+      ...items,
+      {
+        id,
+        body,
+        type: item.type,
+        dataIndex,
+        collected: false,
+        x: lastSpawnX,
+        y,
+      },
+    ];
+    activeIndices.add(dataIndex);
     totalSpawned += 1;
     modified = true;
   }
 
-  if (modified) {
-    return { ...state, items, totalSpawned, lastSpawnX };
-  }
-  return state;
+  return modified
+    ? { ...state, items, totalSpawned, lastSpawnX }
+    : state;
 }
 
 export function removeOffscreenCollectibles(
@@ -135,17 +140,16 @@ export function removeOffscreenCollectibles(
   world: Matter.World
 ): CollectibleState {
   const removeDistance = cameraX - 1000;
-  const toRemove = state.items.filter((c) => c.collected && c.x < removeDistance);
-
+  const toRemove = state.items.filter((item) => item.x < removeDistance);
   if (toRemove.length === 0) return state;
 
-  toRemove.forEach((c) => {
-    Matter.Composite.remove(world, c.body);
-  });
+  for (const item of toRemove) {
+    Matter.Composite.remove(world, item.body);
+  }
 
   return {
     ...state,
-    items: state.items.filter((c) => !(c.collected && c.x < removeDistance)),
+    items: state.items.filter((item) => item.x >= removeDistance),
   };
 }
 
@@ -189,11 +193,19 @@ export function checkCollectiblePickups(
     return { state, collectedItems: [] };
   }
 
+  const collectedDataIndices = Array.from(
+    new Set([
+      ...state.collectedDataIndices,
+      ...collectedItems.map((item) => item.dataIndex),
+    ])
+  );
+
   return {
     state: {
       ...state,
       items,
-      collectedCount: state.collectedCount + collectedItems.length,
+      collectedDataIndices,
+      collectedCount: collectedDataIndices.length,
     },
     collectedItems,
   };

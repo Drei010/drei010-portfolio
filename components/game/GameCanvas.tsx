@@ -76,6 +76,10 @@ export function GameCanvas() {
     }
   }, []);
 
+  const resetControls = useCallback(() => {
+    controlsRef.current = { gasPressed: false, brakePressed: false };
+  }, []);
+
   useEffect(() => {
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -89,15 +93,21 @@ export function GameCanvas() {
     const cleanupKeyboard = setupKeyboardControls(setControls);
 
     const handleVisibility = () => {
+      if (document.hidden) {
+        resetControls();
+      }
       if (gameStateRef.current) {
         gameStateRef.current.running = !document.hidden;
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("blur", resetControls);
 
     return () => {
+      resetControls();
       cleanupKeyboard();
       document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("blur", resetControls);
       if (gameStateRef.current) {
         cleanupGame(gameStateRef.current);
       }
@@ -105,7 +115,7 @@ export function GameCanvas() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [setControls]);
+  }, [resetControls, setControls]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -183,8 +193,9 @@ export function GameCanvas() {
   }, []);
 
   const handleBack = useCallback(() => {
+    resetControls();
     setView("web");
-  }, [setView]);
+  }, [resetControls, setView]);
 
   return (
     <div className="relative h-full w-full overflow-hidden">

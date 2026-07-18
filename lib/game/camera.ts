@@ -5,15 +5,14 @@ const LERP_SPEED_Y = 0.025;
 const LOOKAHEAD_X = 120;
 const OFFSET_Y = -50;
 
-let smoothedVelocityX = 0;
 
 export function createCameraState(): CameraState {
-  smoothedVelocityX = 0;
   return {
     x: 0,
     y: 0,
     targetX: 0,
     targetY: 0,
+    smoothedVelocityX: 0,
   };
 }
 
@@ -27,8 +26,9 @@ export function updateCamera(
   const vehicleY = vehicle.body.position.y;
   const velocityX = vehicle.body.velocity.x;
 
-  // Smooth the velocity to prevent camera jitter from frame-to-frame fluctuations
-  smoothedVelocityX += (velocityX - smoothedVelocityX) * 0.05;
+  const smoothedVelocityX =
+    camera.smoothedVelocityX +
+    (velocityX - camera.smoothedVelocityX) * 0.05;
 
   const lookahead = Math.min(Math.max(smoothedVelocityX * 8, 0), LOOKAHEAD_X);
   const targetX = vehicleX + lookahead - canvasWidth * 0.35;
@@ -43,6 +43,7 @@ export function updateCamera(
     y: Math.min(newY, 0),
     targetX,
     targetY,
+    smoothedVelocityX,
   };
 }
 

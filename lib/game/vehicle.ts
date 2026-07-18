@@ -1,25 +1,28 @@
 import Matter from "matter-js";
 import type { ControlsState, VehicleState } from "./types";
+import { FIXED_PHYSICS_STEP_MS } from "./fixed-step";
+import { VEHICLE_CONFIG } from "./config";
 
-const CHASSIS_WIDTH = 90;
-const CHASSIS_HEIGHT = 22;
-const WHEEL_RADIUS = 16;
-const WHEEL_OFFSET_X = 34;
-const WHEEL_OFFSET_Y = 20;
-const CHASSIS_MASS = 24;
-const WHEEL_MASS = 3;
-const MAX_SPEED = 14;
-const DRIVE_FORCE = 0.07;
-const BRAKE_FORCE = 0.05;
-const ROTATIONAL_STABILITY_MULTIPLIER = 1.35;
-const SPRING_STIFFNESS = 0.05;
-const SPRING_DAMPING = 0.1;
-const LOCATOR_STIFFNESS = 0.1;
-const LOCATOR_DAMPING = 0.08;
-const AIR_PITCH_ACCELERATION = 0.0015;
-const MAX_CONTROLLED_ANGULAR_SPEED = 0.085;
-const MAX_SUSPENSION_DISPLACEMENT = 12;
-const BASE_FRAME_DURATION = 1000 / 60;
+const {
+  chassisWidth: CHASSIS_WIDTH,
+  chassisHeight: CHASSIS_HEIGHT,
+  wheelRadius: WHEEL_RADIUS,
+  wheelOffsetX: WHEEL_OFFSET_X,
+  wheelOffsetY: WHEEL_OFFSET_Y,
+  chassisMass: CHASSIS_MASS,
+  wheelMass: WHEEL_MASS,
+  maxSpeed: MAX_SPEED,
+  driveForce: DRIVE_FORCE,
+  brakeForce: BRAKE_FORCE,
+  rotationalStabilityMultiplier: ROTATIONAL_STABILITY_MULTIPLIER,
+  springStiffness: SPRING_STIFFNESS,
+  springDamping: SPRING_DAMPING,
+  locatorStiffness: LOCATOR_STIFFNESS,
+  locatorDamping: LOCATOR_DAMPING,
+  airPitchAcceleration: AIR_PITCH_ACCELERATION,
+  maxControlledAngularSpeed: MAX_CONTROLLED_ANGULAR_SPEED,
+  maxSuspensionDisplacement: MAX_SUSPENSION_DISPLACEMENT,
+} = VEHICLE_CONFIG;
 
 function createSuspensionConstraints(
   chassis: Matter.Body,
@@ -234,7 +237,7 @@ export function updateAirControl(
   const pitchInput = Number(controls.brakePressed) - Number(controls.gasPressed);
   if (pitchInput === 0) return;
 
-  const frameScale = Math.min(Math.max(delta / BASE_FRAME_DURATION, 0), 2);
+  const frameScale = Math.min(Math.max(delta / FIXED_PHYSICS_STEP_MS, 0), 2);
   const controlledVelocity =
     vehicle.body.angularVelocity +
     pitchInput * AIR_PITCH_ACCELERATION * frameScale;

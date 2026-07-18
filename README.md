@@ -53,3 +53,30 @@ npx vercel
 ```
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/andreikylehidalgo/portfolio)
+
+## Quality Checks
+
+Run the same validation used by CI before opening a pull request:
+
+```bash
+npm run check
+```
+
+Individual checks are available as `npm run typecheck`, `npm run lint`,
+`npm run test:repo`, `npm run test:physics`, and `npm run build`.
+
+## Interaction and Accessibility Support
+
+- Keyboard and coarse-pointer/touch controls are supported in game mode.
+- Interrupted game input is cleared on cancellation, window blur, visibility loss,
+  navigation, and unmount.
+- Motion respects `prefers-reduced-motion`; decorative canvas animation stops its
+  continuous frame loop when reduced motion is enabled.
+- Dialogs trap focus, restore focus on close, and lock the portfolio scroll area.
+- The target is WCAG 2.2 AA for keyboard, focus, form-error, and reduced-motion behavior.
+
+## Game Physics Changes
+
+Changes to vehicle dimensions, forces, suspension, collectibles, fixed stepping, or
+render transforms must update the canonical values in `lib/game/config.ts` and pass
+`npm run test:physics`. Do not duplicate tuning values in renderers or tests.

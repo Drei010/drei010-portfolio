@@ -1,3 +1,5 @@
+import { contactData } from "@/lib/data/contact";
+
 const responses: Array<{ keywords: string[]; response: string }> = [
   {
     keywords: ["tech", "stack", "use", "technology", "tools"],
@@ -11,8 +13,11 @@ const responses: Array<{ keywords: string[]; response: string }> = [
   },
   {
     keywords: ["contact", "hire", "email", "reach", "available"],
-    response:
-      "I'm open to opportunities! You can reach me at hello@andreikyle.dev or find me on GitHub and LinkedIn. Type 'contact' for all my links.",
+    response: `I'm open to opportunities! You can reach me at ${contactData.email}${
+      contactData.links.length > 0
+        ? ` or find me on ${contactData.links.map((link) => link.platform).join(" and ")}`
+        : ""
+    }. Type 'contact' for all my links.`,
   },
   {
     keywords: ["hello", "hi", "hey", "who", "name", "about"],

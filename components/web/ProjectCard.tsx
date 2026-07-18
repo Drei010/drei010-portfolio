@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import { Project } from "@/lib/types";
 
@@ -45,26 +46,27 @@ export function ProjectCard({
       }}
       whileHover={shouldReduceMotion ? undefined : { scale: 1.02 }}
       whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-      tabIndex={0}
-      role="button"
-      aria-label={`View details for ${project.title}`}
-      onClick={() => onSelect?.(project)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onSelect?.(project);
-        }
-      }}
     >
+      {onSelect && (
+        <button
+          type="button"
+          className="absolute inset-0 z-10 rounded-xl focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+          aria-label={`View details for ${project.title}`}
+          onClick={() => onSelect(project)}
+        />
+      )}
+
       {/* Hover gradient overlay */}
       <div className="pointer-events-none absolute inset-0 rounded-xl bg-[radial-gradient(ellipse_at_center,_var(--color-primary)_0%,_transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-[0.04]" />
 
-      <div className="aspect-video w-full bg-surface-alt">
+      <div className="relative aspect-video w-full bg-surface-alt">
         {project.thumbnail ? (
-          <img
+          <Image
             src={project.thumbnail}
             alt={`${project.title} thumbnail`}
-            className="h-full w-full object-cover"
+            fill
+            sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
+            className="object-cover"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted">
@@ -110,7 +112,7 @@ export function ProjectCard({
               href={project.liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-primary hover:underline"
+              className="relative z-20 text-sm font-medium text-primary hover:underline"
               aria-label={`View live demo of ${project.title}`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -122,7 +124,7 @@ export function ProjectCard({
               href={project.repoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-muted hover:text-foreground hover:underline"
+              className="relative z-20 text-sm font-medium text-muted hover:text-foreground hover:underline"
               aria-label={`View source code of ${project.title}`}
               onClick={(e) => e.stopPropagation()}
             >

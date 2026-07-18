@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { contactData } from "@/lib/data/contact";
 
@@ -15,6 +15,9 @@ export function ContactForm() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
+  const emailRef = useRef<HTMLInputElement>(null);
+  const subjectRef = useRef<HTMLInputElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
   const shouldReduceMotion = useReducedMotion();
 
   const entranceVariants = shouldReduceMotion
@@ -48,6 +51,9 @@ export function ContactForm() {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
+      if (validationErrors.email) emailRef.current?.focus();
+      else if (validationErrors.subject) subjectRef.current?.focus();
+      else messageRef.current?.focus();
       return;
     }
 
@@ -76,15 +82,23 @@ export function ContactForm() {
           Your Email
         </label>
         <input
+          ref={emailRef}
           id="contact-email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setErrors((current) => ({ ...current, email: undefined }));
+          }}
+          aria-invalid={Boolean(errors.email)}
+          aria-describedby={errors.email ? "contact-email-error" : undefined}
           placeholder="you@example.com"
           className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none"
         />
         {errors.email && (
-          <p className="mt-1 text-sm text-primary-dim">{errors.email}</p>
+          <p id="contact-email-error" role="alert" className="mt-1 text-sm text-primary-dim">
+            {errors.email}
+          </p>
         )}
       </div>
 
@@ -93,15 +107,23 @@ export function ContactForm() {
           Subject
         </label>
         <input
+          ref={subjectRef}
           id="contact-subject"
           type="text"
           value={subject}
-          onChange={(e) => setSubject(e.target.value)}
+          onChange={(e) => {
+            setSubject(e.target.value);
+            setErrors((current) => ({ ...current, subject: undefined }));
+          }}
+          aria-invalid={Boolean(errors.subject)}
+          aria-describedby={errors.subject ? "contact-subject-error" : undefined}
           placeholder="What's this about?"
           className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none"
         />
         {errors.subject && (
-          <p className="mt-1 text-sm text-primary-dim">{errors.subject}</p>
+          <p id="contact-subject-error" role="alert" className="mt-1 text-sm text-primary-dim">
+            {errors.subject}
+          </p>
         )}
       </div>
 
@@ -110,15 +132,23 @@ export function ContactForm() {
           Message
         </label>
         <textarea
+          ref={messageRef}
           id="contact-message"
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            setErrors((current) => ({ ...current, message: undefined }));
+          }}
+          aria-invalid={Boolean(errors.message)}
+          aria-describedby={errors.message ? "contact-message-error" : undefined}
           placeholder="Your message..."
           rows={5}
           className="w-full resize-none rounded-lg border border-border bg-surface px-4 py-2 text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none"
         />
         {errors.message && (
-          <p className="mt-1 text-sm text-primary-dim">{errors.message}</p>
+          <p id="contact-message-error" role="alert" className="mt-1 text-sm text-primary-dim">
+            {errors.message}
+          </p>
         )}
       </div>
 

@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:physics": "node scripts/test-vehicle-physics.mjs"
+    "typecheck": "tsc --noEmit",
+    "test:repo": "node scripts/test-repository.mjs",
+    "test:physics": "node scripts/test-vehicle-physics.mjs",
+    "test": "npm run test:repo && npm run test:physics",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

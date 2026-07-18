@@ -4,6 +4,12 @@ import "./globals.css";
 import { ViewProvider } from "@/lib/view-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { Header } from "@/components/Header";
+import { WebScrollProvider } from "@/lib/web-scroll-context";
+import {
+  THEME_EXPIRY_MS,
+  THEME_STORAGE_KEY,
+  THEME_TIMESTAMP_KEY,
+} from "@/lib/theme-config";
 import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
@@ -37,7 +43,7 @@ export const metadata: Metadata = {
   },
 };
 
-const themeScript = `(function(){try{document.documentElement.classList.add("no-transition");var t=localStorage.getItem("theme");var ts=localStorage.getItem("theme-timestamp");if(t&&ts){var elapsed=Date.now()-Number(ts);if(elapsed<86400000){if(t==="dark")document.documentElement.classList.add("dark");return}}localStorage.removeItem("theme");localStorage.removeItem("theme-timestamp");var h=new Date().getHours();if(h<6||h>=18)document.documentElement.classList.add("dark")}catch(e){}})()`;
+const themeScript = `(function(){try{document.documentElement.classList.add("no-transition");var k=${JSON.stringify(THEME_STORAGE_KEY)};var tk=${JSON.stringify(THEME_TIMESTAMP_KEY)};var t=localStorage.getItem(k);var ts=localStorage.getItem(tk);if((t==="light"||t==="dark")&&ts&&Number.isFinite(Number(ts))&&Date.now()-Number(ts)>=0&&Date.now()-Number(ts)<${THEME_EXPIRY_MS}){if(t==="dark")document.documentElement.classList.add("dark");return}localStorage.removeItem(k);localStorage.removeItem(tk);var h=new Date().getHours();if(h<6||h>=18)document.documentElement.classList.add("dark")}catch(e){}})()`;
 
 export default function RootLayout({
   children,
@@ -59,10 +65,12 @@ export default function RootLayout({
       <body className="flex h-full flex-col bg-background text-foreground">
         <ThemeProvider>
           <ViewProvider>
-            <Header />
-            <main className="flex min-h-0 flex-1 flex-col">
-              {children}
-            </main>
+            <WebScrollProvider>
+              <Header />
+              <main className="flex min-h-0 flex-1 flex-col">
+                {children}
+              </main>
+            </WebScrollProvider>
           </ViewProvider>
         </ThemeProvider>
         <Analytics />

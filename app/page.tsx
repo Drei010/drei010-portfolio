@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform, useReducedMotion, AnimatePresence } from "motion/react";
 import { useView } from "@/lib/view-context";
+import { useWebScroll } from "@/lib/web-scroll-context";
 import { AboutSection } from "@/components/web/AboutSection";
 import { ServicesSection } from "@/components/web/ServicesSection";
 import { SkillsProjectsConnected } from "@/components/web/SkillsProjectsConnected";
@@ -26,7 +27,8 @@ const gameTransition = {
 export default function Home() {
   const { view } = useView();
   const shouldReduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll();
+  const { scrollContainerRef } = useWebScroll();
+  const { scrollYProgress } = useScroll({ container: scrollContainerRef });
   const parallaxY = useTransform(scrollYProgress, [0, 1], ["0px", "-80px"]);
 
   return (
@@ -60,6 +62,8 @@ export default function Home() {
       {view === "web" && (
         <motion.div
           key="web"
+          ref={scrollContainerRef}
+          data-web-scroll-container
           className="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto"
           initial={shouldReduceMotion ? { opacity: 0 } : viewTransition.initial}
           animate={shouldReduceMotion ? { opacity: 1 } : viewTransition.animate}

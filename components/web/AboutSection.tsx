@@ -16,7 +16,8 @@ export function AboutSection() {
   return (
     <section
       id="about"
-      className="flex min-h-[calc(100vh-3.5rem)] items-center px-4 py-16 sm:py-24 lg:px-8 lg:py-0"
+      tabIndex={-1}
+      className="flex min-h-[calc(100vh-3.5rem)] focus:outline-none items-center px-4 py-16 sm:py-24 lg:px-8 lg:py-0"
     >
       <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-8 lg:max-w-7xl lg:grid-cols-[2fr_1fr_1fr] lg:items-stretch lg:gap-10">
         {/* Left column — About data */}

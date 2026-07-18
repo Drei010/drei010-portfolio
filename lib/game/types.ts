@@ -41,6 +41,7 @@ export type CameraState = {
   y: number;
   targetX: number;
   targetY: number;
+  smoothedVelocityX: number;
 };
 
 export type CollectibleType = "about" | "skills" | "projects" | "contact" | "services";
@@ -58,6 +59,7 @@ export type Collectible = {
 export type CollectibleState = {
   items: Collectible[];
   collectedCount: number;
+  collectedDataIndices: number[];
   totalSpawned: number;
   lastSpawnX: number;
 };

@@ -1,44 +1,14 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { createRequire } from "node:module";
-import ts from "typescript";
-
-const projectRoot = resolve(import.meta.dirname, "..");
-const projectRequire = createRequire(import.meta.url);
-const moduleCache = new Map();
-
-function loadTypeScriptModule(relativePath) {
-  const absolutePath = resolve(projectRoot, relativePath);
-  if (moduleCache.has(absolutePath)) return moduleCache.get(absolutePath).exports;
-
-  const source = readFileSync(absolutePath, "utf8");
-  const output = ts.transpileModule(source, {
-    compilerOptions: {
-      esModuleInterop: true,
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2020,
-    },
-    fileName: absolutePath,
-  }).outputText;
-  const compiledModule = { exports: {} };
-  moduleCache.set(absolutePath, compiledModule);
-
-  function localRequire(specifier) {
-    if (!specifier.startsWith(".")) return projectRequire(specifier);
-    const dependencyPath = resolve(absolutePath, "..", specifier);
-    const withExtension = dependencyPath.endsWith(".ts") ? dependencyPath : `${dependencyPath}.ts`;
-    return loadTypeScriptModule(withExtension.slice(projectRoot.length + 1));
-  }
-
-  const evaluate = new Function("require", "module", "exports", output);
-  evaluate(localRequire, compiledModule, compiledModule.exports);
-  return compiledModule.exports;
-}
+import {
+  loadTypeScriptModule,
+  projectRequire,
+} from "./ts-module-loader.mjs";
 
 const Matter = projectRequire("matter-js");
 const vehicleModule = loadTypeScriptModule("lib/game/vehicle.ts");
 const rendererModule = loadTypeScriptModule("lib/game/vehicle-renderer.ts");
+const collectiblesModule = loadTypeScriptModule("lib/game/collectibles.ts");
+const { VEHICLE_CONFIG } = loadTypeScriptModule("lib/game/config.ts");
 const fixedStepModule = loadTypeScriptModule("lib/game/fixed-step.ts");
 const STEP_MS = 1000 / 60;
 const tests = [];
@@ -72,8 +42,8 @@ function getWheelMountPosition(body, horizontalOffset) {
   const cosine = Math.cos(body.angle);
   const sine = Math.sin(body.angle);
   return {
-    x: body.position.x + horizontalOffset * cosine - 20 * sine,
-    y: body.position.y + horizontalOffset * sine + 20 * cosine,
+    x: body.position.x + horizontalOffset * cosine - VEHICLE_CONFIG.wheelOffsetY * sine,
+    y: body.position.y + horizontalOffset * sine + VEHICLE_CONFIG.wheelOffsetY * cosine,
   };
 }
 
@@ -146,7 +116,7 @@ test("renders the chassis and both wheels at their physical world positions", ()
 test("does not apply more gas at the existing speed limit", () => {
   const vehicle = vehicleModule.createVehicle(100, 100);
   for (const body of allVehicleBodies(vehicle)) {
-    Matter.Body.setVelocity(body, { x: 14, y: 0 });
+    Matter.Body.setVelocity(body, { x: VEHICLE_CONFIG.maxSpeed, y: 0 });
   }
   vehicleModule.applyGas(vehicle);
   const totalForce = allVehicleBodies(vehicle).reduce((sum, body) => sum + body.force.x, 0);
@@ -183,7 +153,7 @@ test("preserves brake force and the existing reverse speed limit", () => {
 
   const limitedVehicle = vehicleModule.createVehicle(100, 100);
   for (const body of allVehicleBodies(limitedVehicle)) {
-    Matter.Body.setVelocity(body, { x: -5.61, y: 0 });
+    Matter.Body.setVelocity(body, { x: -VEHICLE_CONFIG.maxSpeed * 0.41, y: 0 });
   }
   vehicleModule.applyBrake(limitedVehicle);
   const limitedForce = allVehicleBodies(limitedVehicle).reduce(
@@ -279,8 +249,8 @@ test("keeps wheels within bounded travel during a high-impact angled landing", (
     Matter.Engine.update(engine, STEP_MS);
     vehicleModule.stabilizeSuspension(vehicle);
     for (const [wheel, offset] of [
-      [vehicle.wheelFront, 34],
-      [vehicle.wheelRear, -34],
+      [vehicle.wheelFront, VEHICLE_CONFIG.wheelOffsetX],
+      [vehicle.wheelRear, -VEHICLE_CONFIG.wheelOffsetX],
     ]) {
       const mount = getWheelMountPosition(vehicle.body, offset);
       maximumMountDisplacement = Math.max(
@@ -293,7 +263,68 @@ test("keeps wheels within bounded travel during a high-impact angled landing", (
   console.log(
     `  high-impact maximum mount displacement ${maximumMountDisplacement.toFixed(2)}px`
   );
-  assert.ok(maximumMountDisplacement <= 12.0001);
+  assert.ok(
+    maximumMountDisplacement <=
+      VEHICLE_CONFIG.maxSuspensionDisplacement + 0.0001
+  );
+});
+
+
+test("keeps collectible progress unique and removes stale physics bodies", () => {
+  const engine = Matter.Engine.create();
+  let state = collectiblesModule.createCollectibleState();
+  const total = collectiblesModule.getTotalCollectibleCount();
+
+  for (let cameraX = 0; cameraX <= 12000; cameraX += 800) {
+    state = collectiblesModule.removeOffscreenCollectibles(
+      state,
+      cameraX,
+      engine.world
+    );
+    state = collectiblesModule.spawnCollectibles(
+      state,
+      cameraX,
+      800,
+      1,
+      engine.world
+    );
+    const activeIndices = state.items.map((item) => item.dataIndex);
+    assert.equal(new Set(activeIndices).size, activeIndices.length);
+    assert.ok(state.items.length <= total);
+  }
+
+  const target = state.items[0];
+  assert.ok(target);
+  const pickup = collectiblesModule.checkCollectiblePickups(
+    state,
+    target.x,
+    target.y,
+    engine.world
+  );
+  state = pickup.state;
+  assert.equal(pickup.collectedItems.length, 1);
+  assert.equal(state.collectedCount, 1);
+
+  const duplicatePickup = collectiblesModule.checkCollectiblePickups(
+    state,
+    target.x,
+    target.y,
+    engine.world
+  );
+  assert.equal(duplicatePickup.collectedItems.length, 0);
+  assert.equal(duplicatePickup.state.collectedCount, 1);
+  assert.ok(state.collectedCount <= total);
+
+  state = collectiblesModule.removeOffscreenCollectibles(
+    state,
+    50000,
+    engine.world
+  );
+  assert.equal(state.items.length, 0);
+  const collectibleBodies = Matter.Composite.allBodies(engine.world).filter(
+    (body) => body.label.startsWith("collectible-")
+  );
+  assert.equal(collectibleBodies.length, 0);
 });
 
 test("gas and brake provide opposite airborne pitch without linear speed changes", () => {

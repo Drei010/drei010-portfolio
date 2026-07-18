@@ -7,9 +7,16 @@ type CommandInputProps = {
   onChange: (value: string) => void;
   onSubmit: (command: string) => void;
   onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 };
 
-export function CommandInput({ value, onChange, onSubmit, onKeyDown }: CommandInputProps) {
+export function CommandInput({
+  value,
+  onChange,
+  onSubmit,
+  onKeyDown,
+  disabled = false,
+}: CommandInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -43,6 +50,8 @@ export function CommandInput({ value, onChange, onSubmit, onKeyDown }: CommandIn
         autoComplete="off"
         autoCapitalize="off"
         aria-label="Terminal command input"
+        aria-busy={disabled}
+        disabled={disabled}
       />
     </div>
   );

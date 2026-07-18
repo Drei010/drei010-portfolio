@@ -1,9 +1,12 @@
 import { VehicleState } from "./types";
+import { VEHICLE_CONFIG, VEHICLE_RENDER_CONFIG } from "./config";
 
-const CAR_WIDTH = 120;
-const CAR_HEIGHT = 60;
-const WHEEL_RADIUS = 14;
-const PHYSICS_WHEEL_OFFSET_X = 34;
+const {
+  carWidth: CAR_WIDTH,
+  carHeight: CAR_HEIGHT,
+  wheelRadius: WHEEL_RADIUS,
+} = VEHICLE_RENDER_CONFIG;
+const PHYSICS_WHEEL_OFFSET_X = VEHICLE_CONFIG.wheelOffsetX;
 
 let carImage: HTMLImageElement | null = null;
 let processedCanvas: HTMLCanvasElement | null = null;
