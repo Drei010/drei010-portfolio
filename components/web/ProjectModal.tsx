@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Project } from "@/lib/types";
+import { useWebScroll } from "@/lib/web-scroll-context";
 
 type ProjectModalProps = {
   project: Project | null;
@@ -11,6 +13,7 @@ type ProjectModalProps = {
 
 export function ProjectModal({ project, onClose }: ProjectModalProps) {
   const shouldReduceMotion = useReducedMotion();
+  const { scrollContainerRef } = useWebScroll();
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -50,14 +53,24 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
       }
     };
 
+    const scrollContainer = scrollContainerRef.current;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousContainerOverflow = scrollContainer?.style.overflow ?? "";
+
     document.addEventListener("keydown", handleKeyDown);
     document.body.style.overflow = "hidden";
+    if (scrollContainer) {
+      scrollContainer.style.overflow = "hidden";
+    }
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousBodyOverflow;
+      if (scrollContainer) {
+        scrollContainer.style.overflow = previousContainerOverflow;
+      }
     };
-  }, [project, onClose]);
+  }, [project, onClose, scrollContainerRef]);
 
   return (
     <AnimatePresence>
@@ -129,12 +142,14 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             </motion.button>
 
             {/* Thumbnail area */}
-            <div className="aspect-video w-full bg-surface-alt">
+            <div className="relative aspect-video w-full bg-surface-alt">
               {project.thumbnail ? (
-                <img
+                <Image
                   src={project.thumbnail}
                   alt={`${project.title} thumbnail`}
-                  className="h-full w-full object-cover"
+                  fill
+                  sizes="(min-width: 640px) 512px, 100vw"
+                  className="object-cover"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-muted">

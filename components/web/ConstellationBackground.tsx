@@ -238,6 +238,9 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
     hasPointerRef.current = window.matchMedia("(pointer: fine)").matches;
 
     const pointerQuery = window.matchMedia("(pointer: fine)");
@@ -245,9 +248,6 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
       hasPointerRef.current = e.matches;
     };
     pointerQuery.addEventListener("change", handlePointerChange);
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
 
     const initializeCanvas = () => {
       const { newWidth, newHeight } = syncCanvasSize(canvas);
@@ -257,8 +257,10 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
       }
     };
 
-    // Try to initialize immediately
     initializeCanvas();
+    if (shouldReduceMotion) {
+      draw(ctx);
+    }
 
     // Use ResizeObserver to handle cases where canvas has zero dimensions
     // on initial mount (e.g., during page refresh before layout is computed)
@@ -288,6 +290,9 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
               nodesRef.current = createNodes(newWidth, newHeight);
             }
           }
+          if (shouldReduceMotion) {
+            draw(ctx);
+          }
         }
       }
     });
@@ -299,7 +304,9 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
       animationFrameRef.current = requestAnimationFrame(animate);
     };
 
-    animationFrameRef.current = requestAnimationFrame(animate);
+    if (!shouldReduceMotion) {
+      animationFrameRef.current = requestAnimationFrame(animate);
+    }
 
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -308,10 +315,12 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
         y: e.clientY - rect.top,
         active: true,
       };
+      if (shouldReduceMotion) draw(ctx);
     };
 
     const handleMouseLeave = () => {
       mouseRef.current = { ...mouseRef.current, active: false };
+      if (shouldReduceMotion) draw(ctx);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -325,7 +334,7 @@ export function ConstellationBackground({ className }: ConstellationBackgroundPr
       pointerQuery.removeEventListener("change", handlePointerChange);
       initializedRef.current = false;
     };
-  }, [syncCanvasSize, draw]);
+  }, [syncCanvasSize, draw, shouldReduceMotion, opacityScale]);
 
   return (
     <canvas

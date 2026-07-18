@@ -1,4 +1,4 @@
-export type ViewMode = "web" | "cli";
+export type ViewMode = "web" | "cli" | "game";
 
 export type ThemeMode = "light" | "dark";
 

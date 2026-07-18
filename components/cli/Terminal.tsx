@@ -81,6 +81,8 @@ export function Terminal() {
     return getWelcomeLines(mobile);
   });
   const [input, setInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { setView } = useView();
   const { add, navigateUp, navigateDown, resetNavigation } = useCommandHistory();
@@ -98,10 +100,13 @@ export function Terminal() {
   const handleSubmit = useCallback(
     async (command: string) => {
       const trimmed = command.trim();
-      if (!trimmed) return;
+      if (!trimmed || submittingRef.current) return;
 
+      submittingRef.current = true;
       add(trimmed);
       resetNavigation();
+      setInput("");
+      setIsSubmitting(true);
 
       const commandLine: TerminalLine = {
         id: `cmd-${Date.now()}`,
@@ -111,18 +116,34 @@ export function Terminal() {
         ],
         isCommand: true,
       };
+      setLines((previous) => [...previous, commandLine]);
 
-      const result = await executeCommand(trimmed);
-
-      if (result.clear) {
-        setLines([]);
-      } else if (result.switchView) {
-        setView(result.switchView);
-      } else {
-        setLines((prev) => [...prev, commandLine, ...result.lines]);
+      try {
+        const result = await executeCommand(trimmed);
+        if (result.clear) {
+          setLines([]);
+        } else if (result.switchView) {
+          setView(result.switchView);
+        } else {
+          setLines((previous) => [...previous, ...result.lines]);
+        }
+      } catch {
+        setLines((previous) => [
+          ...previous,
+          {
+            id: `error-${Date.now()}`,
+            segments: [
+              {
+                text: "Command failed. Please try again.",
+                color: "primary",
+              },
+            ],
+          },
+        ]);
+      } finally {
+        submittingRef.current = false;
+        setIsSubmitting(false);
       }
-
-      setInput("");
     },
     [add, resetNavigation, setView]
   );
@@ -147,10 +168,10 @@ export function Terminal() {
   );
 
   return (
-    <div className="flex flex-1 flex-col content-center bg-terminal-bg font-mono text-sm">
+    <div className="flex min-h-0 flex-1 flex-col bg-terminal-bg font-mono text-sm">
       <div
         ref={scrollRef}
-        className=" overflow-y-auto p-4 scrollbar-hidden"
+        className="min-h-0 flex-1 overflow-y-auto p-4 scrollbar-hidden"
         onClick={() => {
           const inputEl = document.querySelector<HTMLInputElement>(
             'input[aria-label="Terminal command input"]'
@@ -168,6 +189,7 @@ export function Terminal() {
           onChange={setInput}
           onSubmit={handleSubmit}
           onKeyDown={handleKeyDown}
+          disabled={isSubmitting}
         />
       </div>
     </div>

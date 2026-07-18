@@ -1,9 +1,11 @@
 "use client";
 
 import { motion, useScroll, useSpring, useReducedMotion } from "motion/react";
+import { useWebScroll } from "@/lib/web-scroll-context";
 
 export function ScrollProgressBar() {
-  const { scrollYProgress } = useScroll();
+  const { scrollContainerRef } = useWebScroll();
+  const { scrollYProgress } = useScroll({ container: scrollContainerRef });
   const shouldReduceMotion = useReducedMotion();
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
 
