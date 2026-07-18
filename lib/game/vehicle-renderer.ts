@@ -3,9 +3,7 @@ import { VehicleState } from "./types";
 const CAR_WIDTH = 120;
 const CAR_HEIGHT = 60;
 const WHEEL_RADIUS = 14;
-const WHEEL_FRONT_X = 32;
-const WHEEL_REAR_X = -32;
-const WHEEL_Y = 18;
+const PHYSICS_WHEEL_OFFSET_X = 34;
 
 let carImage: HTMLImageElement | null = null;
 let processedCanvas: HTMLCanvasElement | null = null;
@@ -47,6 +45,38 @@ function loadCarImage(): void {
   };
 }
 
+function getChassisAnchor(
+  body: VehicleState["body"],
+  horizontalOffset: number
+): { x: number; y: number } {
+  const cosine = Math.cos(body.angle);
+  const sine = Math.sin(body.angle);
+  return {
+    x: body.position.x + horizontalOffset * cosine,
+    y: body.position.y + horizontalOffset * sine,
+  };
+}
+
+function renderSuspensionLink(
+  ctx: CanvasRenderingContext2D,
+  body: VehicleState["body"],
+  wheel: VehicleState["wheelFront"],
+  horizontalOffset: number
+): void {
+  const anchor = getChassisAnchor(body, horizontalOffset);
+  ctx.save();
+  ctx.strokeStyle = "rgba(30, 41, 59, 0.75)";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(anchor.x, anchor.y);
+  ctx.lineTo(wheel.position.x, wheel.position.y);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(249, 115, 22, 0.55)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+}
+
 export function renderVehicle(
   ctx: CanvasRenderingContext2D,
   vehicle: VehicleState
@@ -55,15 +85,15 @@ export function renderVehicle(
     loadCarImage();
   }
 
-  const { body, wheelVisualAngle } = vehicle;
-  const { x, y } = body.position;
-  const angle = body.angle;
+  const { body, wheelFront, wheelRear } = vehicle;
+
+  renderSuspensionLink(ctx, body, wheelFront, PHYSICS_WHEEL_OFFSET_X);
+  renderSuspensionLink(ctx, body, wheelRear, -PHYSICS_WHEEL_OFFSET_X);
 
   ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(angle);
+  ctx.translate(body.position.x, body.position.y);
+  ctx.rotate(body.angle);
 
-  // Draw car image first (bottom layer)
   if (imageReady && processedCanvas) {
     ctx.scale(-1, 1);
     ctx.drawImage(
@@ -73,9 +103,7 @@ export function renderVehicle(
       CAR_WIDTH,
       CAR_HEIGHT
     );
-    ctx.scale(-1, 1);
   } else {
-    // Fallback while image loads
     ctx.fillStyle = "#1e293b";
     ctx.strokeStyle = "#475569";
     ctx.lineWidth = 2;
@@ -84,23 +112,19 @@ export function renderVehicle(
     ctx.fill();
     ctx.stroke();
   }
-
-  // Draw wheels on top of the car body
-  renderWheel(ctx, WHEEL_FRONT_X, WHEEL_Y, wheelVisualAngle);
-  renderWheel(ctx, WHEEL_REAR_X, WHEEL_Y, wheelVisualAngle);
-
   ctx.restore();
+
+  renderWheel(ctx, wheelFront);
+  renderWheel(ctx, wheelRear);
 }
 
 function renderWheel(
   ctx: CanvasRenderingContext2D,
-  offsetX: number,
-  offsetY: number,
-  angle: number
+  wheel: VehicleState["wheelFront"]
 ): void {
   ctx.save();
-  ctx.translate(offsetX, offsetY);
-  ctx.rotate(angle);
+  ctx.translate(wheel.position.x, wheel.position.y);
+  ctx.rotate(wheel.angle);
 
   // Tire
   ctx.fillStyle = "#1a1a1a";

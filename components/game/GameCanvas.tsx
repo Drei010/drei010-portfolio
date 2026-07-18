@@ -5,6 +5,10 @@ import { GameState, ControlsState } from "@/lib/game/types";
 import { initGameState, updateGame, renderGame, cleanupGame } from "@/lib/game/engine";
 import { setupKeyboardControls } from "@/lib/game/controls";
 import { getTotalCollectibleCount } from "@/lib/game/collectibles";
+import {
+  consumeFixedSteps,
+  FIXED_PHYSICS_STEP_MS,
+} from "@/lib/game/fixed-step";
 import { GameControls } from "./GameControls";
 import { GameHUD } from "./GameHUD";
 import { useView } from "@/lib/view-context";
@@ -110,28 +114,38 @@ export function GameCanvas() {
     if (!ctx) return;
 
     let lastTime = 0;
+    let accumulator = 0;
 
     function gameLoop(time: number) {
       if (!gameStateRef.current || !ctx || !canvas) return;
 
-      // Cap delta to prevent physics explosions on tab refocus
-      const delta = lastTime === 0 ? 16.67 : Math.min(time - lastTime, 33.33);
+      const frameDelta =
+        lastTime === 0 ? FIXED_PHYSICS_STEP_MS : time - lastTime;
       lastTime = time;
 
-      const state = gameStateRef.current;
-      if (state.running) {
-        // Sync started flag from ref to prevent race condition
+      if (gameStateRef.current.running) {
+        const stepBatch = consumeFixedSteps(accumulator, frameDelta);
+        accumulator = stepBatch.remainder;
+
+        let state = gameStateRef.current;
         state.started = startedRef.current;
-        gameStateRef.current = updateGame(
-          state,
-          controlsRef.current,
-          canvas.width,
-          canvas.height,
-          delta
-        );
-        renderGame(ctx, gameStateRef.current, canvas.width, canvas.height, time);
-        setDistance(gameStateRef.current.distance);
-        setCollected(gameStateRef.current.collectibles.collectedCount);
+
+        for (let step = 0; step < stepBatch.steps; step += 1) {
+          state = updateGame(
+            state,
+            controlsRef.current,
+            canvas.width,
+            canvas.height,
+            FIXED_PHYSICS_STEP_MS
+          );
+        }
+
+        gameStateRef.current = state;
+        renderGame(ctx, state, canvas.width, canvas.height, time);
+        setDistance(state.distance);
+        setCollected(state.collectibles.collectedCount);
+      } else {
+        accumulator = 0;
       }
 
       animationFrameRef.current = requestAnimationFrame(gameLoop);

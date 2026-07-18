@@ -16,7 +16,10 @@ export type GameState = {
 
 export type VehicleState = {
   body: Matter.Body;
-  wheelVisualAngle: number;
+  wheelFront: Matter.Body;
+  wheelRear: Matter.Body;
+  suspensionConstraints: Matter.Constraint[];
+  composite: Matter.Composite;
 };
 
 export type TerrainChunk = {

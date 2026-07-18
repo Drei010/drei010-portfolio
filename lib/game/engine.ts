@@ -1,6 +1,14 @@
 import Matter from "matter-js";
 import { GameState, ControlsState, CloudInfo } from "./types";
-import { createVehicle, addVehicleToWorld, applyGas, applyBrake, updateWheelVisualAngle } from "./vehicle";
+import {
+  createVehicle,
+  addVehicleToWorld,
+  applyGas,
+  applyBrake,
+  stabilizeSuspension,
+  isVehicleGrounded,
+  updateAirControl,
+} from "./vehicle";
 import { renderVehicle } from "./vehicle-renderer";
 import { createTerrainState, updateTerrain } from "./terrain";
 import { renderTerrain } from "./terrain-renderer";
@@ -23,9 +31,9 @@ const VEHICLE_START_Y = 509;
 export function initGameState(): GameState {
   const engine = Matter.Engine.create({
     gravity: { x: 0, y: 1, scale: 0.001 },
-    positionIterations: 6,
-    velocityIterations: 4,
-    constraintIterations: 2,
+    positionIterations: 8,
+    velocityIterations: 6,
+    constraintIterations: 6,
   });
 
   const vehicle = createVehicle(VEHICLE_START_X, VEHICLE_START_Y);
@@ -68,10 +76,16 @@ export function updateGame(
       applyBrake(state.vehicle);
     }
     Matter.Engine.update(state.engine, delta);
+    stabilizeSuspension(state.vehicle);
+    updateAirControl(
+      state.vehicle,
+      controls,
+      isVehicleGrounded(state.engine, state.vehicle),
+      delta
+    );
   }
 
-  // Update visual wheel rotation
-  const vehicle = updateWheelVisualAngle(state.vehicle);
+  const vehicle = state.vehicle;
 
   // Update camera
   const camera = updateCamera(state.camera, vehicle, canvasWidth, canvasHeight);
