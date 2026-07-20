@@ -9,7 +9,7 @@ A tri-view developer portfolio built with Next.js, TypeScript, and Tailwind CSS.
 - **Game View** — Procedural terrain, collectible portfolio items, and Matter.js vehicle physics.
 - **Local-first chat** — Curated answers are resolved in the browser before any AI request is made.
 - **Provider-neutral AI** — Gemini is isolated behind a server-side streaming provider contract so another provider can be added later.
-- **Production safeguards** — Strict request bounds, portfolio-only context, explicit Gemini safety settings, no model tools, and durable Upstash rate limiting.
+- **AI safeguards** — Strict request bounds, portfolio-only context, explicit Gemini safety settings, no model tools, and safe provider errors.
 - **Accessible interaction** — Keyboard and touch support, reduced-motion handling, stream status announcements, and cancellable AI output.
 
 ## Tech Stack
@@ -18,7 +18,6 @@ A tri-view developer portfolio built with Next.js, TypeScript, and Tailwind CSS.
 - **Language:** TypeScript in strict mode
 - **UI:** React 19, Tailwind CSS v4, Motion
 - **AI:** LangChain `@langchain/google` with Gemini
-- **Rate limiting:** Upstash Redis and Upstash Rate Limit
 - **Game physics:** Matter.js and HTML5 Canvas
 - **Testing:** Vitest, Testing Library, jsdom, and repository-specific Node checks
 
@@ -32,7 +31,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The prepared CLI answers work without external credentials. Gemini fallback requests return a safe configuration error until both Gemini and Upstash are configured.
+Open [http://localhost:3000](http://localhost:3000). Prepared CLI answers work without external credentials. Gemini fallback requests return a safe configuration error until a Gemini API key is configured.
 
 ## Environment Configuration
 
@@ -41,18 +40,14 @@ The repository includes a secret-free `.env.example`; local `.env*` files remain
 ```dotenv
 CHAT_PROVIDER=gemini
 GOOGLE_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
+GEMINI_MODEL=gemini-flash-lite-latest
 ```
 
 | Variable | Purpose |
 | --- | --- |
 | `CHAT_PROVIDER` | Provider selected by the server factory. Currently accepts `gemini`. |
 | `GOOGLE_API_KEY` | Server-only Gemini API key from Google AI Studio. |
-| `GEMINI_MODEL` | Gemini model ID. The template uses `gemini-2.5-flash`; change it without modifying UI code. |
-| `UPSTASH_REDIS_REST_URL` | REST URL for the Upstash Redis database. |
-| `UPSTASH_REDIS_REST_TOKEN` | Server-only REST token for that database. |
+| `GEMINI_MODEL` | Gemini model ID. The template uses `gemini-flash-lite-latest`; change it without modifying UI code. |
 
 ### Configure Gemini
 
@@ -60,14 +55,6 @@ UPSTASH_REDIS_REST_TOKEN=
 2. Create an API key for the intended Google project.
 3. Set `GOOGLE_API_KEY` in `.env` locally and in the deployment environment.
 4. Confirm that `GEMINI_MODEL` is available to that project.
-
-### Configure Upstash
-
-1. Create a Redis database in the [Upstash Console](https://console.upstash.com/redis).
-2. Copy its REST URL and REST token into the two `UPSTASH_REDIS_*` variables.
-3. Add the same variables to the deployment environment.
-
-The chat endpoint uses a Redis-backed sliding window of 10 AI fallback requests per 10 minutes per hashed client IP. Prepared answers do not call the endpoint and do not consume this quota.
 
 ## Using the CLI Chatbot
 
@@ -87,7 +74,7 @@ Resolution order:
 4. An unmatched explicit or conversational question is sent to `/api/chat` with bounded session history.
 5. Gemini tokens stream into one stable terminal line as they arrive.
 
-Chat history exists only in memory for the current CLI session. `clear` resets both terminal output and chat history; refresh also starts a new session. Press `Ctrl+C`, `Cmd+C`, or `Escape` to cancel an active response.
+Prepared answers stay entirely in the browser and do not call the API. Chat history exists only in memory for the current CLI session. `clear` resets both terminal output and chat history; refresh also starts a new session. Press `Ctrl+C`, `Cmd+C`, or `Escape` to cancel an active response.
 
 ## Chat Architecture
 
@@ -95,16 +82,16 @@ Chat history exists only in memory for the current CLI session. `clear` resets b
 CLI input
   ├─ known command ───────────────> local command output
   └─ question
-       ├─ prepared match ─────────> local answer, no quota use
+       ├─ prepared match ─────────> local answer, no API request
        └─ miss ───────────────────> POST /api/chat
-                                      ├─ validation and bounds
-                                      ├─ Upstash rate limit
+                                      ├─ content type and body bounds
+                                      ├─ question and history validation
                                       ├─ trusted portfolio context
                                       ├─ ChatProvider factory
                                       └─ Gemini NDJSON token stream
 ```
 
-Shared contracts live in `lib/chat/contracts.ts`. The browser parser in `lib/chat/client.ts` consumes newline-delimited events:
+Shared contracts live in `lib/chat/contracts.ts`. The browser parser in `lib/chat/client.ts` consumes strict newline-delimited events:
 
 - `{ "type": "token", "text": "..." }`
 - `{ "type": "done" }`
@@ -136,13 +123,13 @@ No terminal, command-routing, session-history, or API protocol changes should be
 
 ## Security Model
 
-- Gemini credentials and Upstash tokens are read only by server modules.
+- Gemini credentials are read only by server modules.
 - The model receives only public data assembled from canonical portfolio files.
 - User questions and history are untrusted, separately role-tagged, and strictly bounded.
+- The endpoint rejects unsupported media types, malformed payloads, and oversized bodies before provider invocation.
 - The system prompt requires portfolio-only answers and missing-information declines.
 - Gemini safety filters are explicitly enabled for harassment, hate speech, sexual content, and dangerous content.
 - Tools, code execution, web search, URL retrieval, filesystem access, and autonomous actions are not enabled.
-- Client IP values are SHA-256 hashed before use as Upstash identifiers.
 - Model text is rendered by React as plain text; it is never interpreted as HTML.
 - Provider errors, prompts, stack traces, and credentials are not returned to clients.
 - Prompt-injection defenses reduce exposure but cannot guarantee model compliance; keep the model least-privileged and test adversarial inputs when prompts or providers change.
@@ -158,7 +145,7 @@ No terminal, command-routing, session-history, or API protocol changes should be
 │   └── web/                      # Portfolio sections
 ├── lib/
 │   ├── chat/                     # Shared contracts, client parser, session helpers
-│   │   └── server/               # Context, providers, limiter, and handler
+│   │   └── server/               # Context, provider adapters, and handler
 │   ├── cli/                      # Commands, matching, autocomplete, history
 │   ├── data/                     # Canonical portfolio and prepared-answer data
 │   └── game/                     # Physics, terrain, rendering, and state
@@ -185,16 +172,16 @@ npm run test:chat
 npm run build
 ```
 
-`test:chat` covers prepared routing, strict API validation, rate-limit rejection, Unicode-safe NDJSON parsing, progressive terminal rendering, safe provider failures, and session reset behavior. Real Gemini and Upstash calls are intentionally excluded from automated tests.
+`test:chat` covers prepared routing, strict API validation, Unicode-safe NDJSON parsing, progressive terminal rendering, safe provider failures, bounded session history, cancellation, and session reset behavior. Real Gemini calls are intentionally excluded from automated tests.
 
 ## Troubleshooting
 
-- **“Chat is not configured”** — Confirm all four Gemini/Upstash credential variables are non-empty and restart the development server.
-- **Prepared answers work but AI questions fail** — This is expected when external credentials are absent; local matching bypasses the API.
-- **HTTP 429** — Wait for the `Retry-After` period. Adjust the limiter in `lib/chat/server/rate-limit.ts` only after reviewing cost exposure.
-- **Model unavailable** — Verify `GEMINI_MODEL` against the models enabled for the Google project.
-- **Stream interrupted** — Retry after checking network connectivity and provider status. Partial responses are not added to session history.
-- **Build succeeds without credentials** — Expected. Providers and the limiter initialize lazily on requests rather than at build time.
+- **“Chat is not configured”** — Confirm `GOOGLE_API_KEY` is non-empty and restart the development server.
+- **Prepared answers work but AI questions fail** — This is expected when the Gemini credential is absent; local matching bypasses the API.
+- **Model unavailable** — Verify `GEMINI_MODEL` against the models enabled for the Google project; the template uses the tested `gemini-flash-lite-latest` alias.
+- **AI service temporarily busy** — Retry shortly; transient provider capacity errors are reported separately from model-configuration failures.
+- **Response failed** — Retry after checking network connectivity and provider status. Partial responses are not added to session history.
+- **Build succeeds without credentials** — Expected. The provider initializes lazily when an AI request reaches the route.
 
 ## Interaction and Accessibility Support
 
@@ -215,6 +202,6 @@ Changes to vehicle dimensions, forces, suspension, collectibles, fixed stepping,
 npx vercel
 ```
 
-Add every server-only environment variable to the deployment project before enabling public AI fallback. Do not expose or commit `.env`.
+Add the server-only Gemini environment variables to the deployment project before enabling public AI fallback. Do not expose or commit `.env`.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/andreikylehidalgo/portfolio)

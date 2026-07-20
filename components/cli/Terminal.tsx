@@ -85,13 +85,8 @@ function getWelcomeLines(isMobile: boolean): TerminalLine[] {
 }
 
 function getChatErrorMessage(error: unknown): string {
-  if (error instanceof ChatClientError) {
-    if (error.code === "rate_limited" && error.retryAfter) {
-      return `${error.message} Try again in about ${error.retryAfter} seconds.`;
-    }
-    return error.message;
-  }
-  return "The AI response was interrupted. Please try again.";
+  if (error instanceof ChatClientError) return error.message;
+  return "The AI response failed. Please try again.";
 }
 
 function updateTerminalLine(
@@ -326,7 +321,7 @@ export function Terminal() {
       </p>
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto p-4 scrollbar-hidden"
+        className="flex min-h-0 flex-1 flex-col justify-start overflow-y-auto scrollbar-hidden"
         aria-busy={isSubmitting}
         onClick={() => {
           const inputElement = document.querySelector<HTMLInputElement>(
@@ -335,18 +330,20 @@ export function Terminal() {
           inputElement?.focus();
         }}
       >
-        {lines.map((line) => (
-          <OutputLine key={line.id} line={line} />
-        ))}
-      </div>
-      <div className="border-t border-border/30 p-4">
-        <CommandInput
-          value={input}
-          onChange={setInput}
-          onSubmit={handleSubmit}
-          onKeyDown={handleKeyDown}
-          busy={isSubmitting}
-        />
+        <div className="w-full p-4">
+          {lines.map((line) => (
+            <OutputLine key={line.id} line={line} />
+          ))}
+          <div className="mt-4">
+            <CommandInput
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSubmit}
+              onKeyDown={handleKeyDown}
+              busy={isSubmitting}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

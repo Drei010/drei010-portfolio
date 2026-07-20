@@ -16,17 +16,15 @@ export type ChatStreamOptions = {
 export class ChatClientError extends Error {
   readonly code: string;
   readonly status: number | null;
-  readonly retryAfter: number | null;
 
   constructor(
     message: string,
-    options: { code: string; status?: number; retryAfter?: number | null }
+    options: { code: string; status?: number }
   ) {
     super(message);
     this.name = "ChatClientError";
     this.code = options.code;
     this.status = options.status ?? null;
-    this.retryAfter = options.retryAfter ?? null;
   }
 }
 
@@ -97,13 +95,9 @@ async function readHttpError(response: Response): Promise<ChatClientError> {
     }
   } catch {}
 
-  const retryAfterHeader = response.headers.get("retry-after");
-  const parsedRetryAfter = retryAfterHeader ? Number(retryAfterHeader) : Number.NaN;
-
   return new ChatClientError(message, {
     code,
     status: response.status,
-    retryAfter: Number.isFinite(parsedRetryAfter) ? parsedRetryAfter : null,
   });
 }
 

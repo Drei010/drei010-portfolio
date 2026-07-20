@@ -26,6 +26,6 @@ export function createChatProvider(
 
   return new GeminiChatProvider({
     apiKey,
-    model: environment.GEMINI_MODEL?.trim() || "gemini-2.5-flash",
+    model: environment.GEMINI_MODEL?.trim() || "gemini-flash-lite-latest",
   });
 }

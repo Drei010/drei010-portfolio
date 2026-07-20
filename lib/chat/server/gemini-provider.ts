@@ -7,12 +7,27 @@ import {
   type BaseMessage,
 } from "@langchain/core/messages";
 import { ChatGoogle } from "@langchain/google/node";
-import type { ChatProvider, ChatProviderInput } from "@/lib/chat/server/provider";
+import {
+  normalizeChatProviderError,
+  type ChatProvider,
+  type ChatProviderInput,
+} from "@/lib/chat/server/provider";
 
 export type GeminiProviderConfig = {
   apiKey: string;
   model: string;
 };
+
+export type GeminiStreamChunk = {
+  text: string;
+};
+
+export interface GeminiStreamingModel {
+  stream(
+    messages: BaseMessage[],
+    options: { signal: AbortSignal }
+  ): Promise<AsyncIterable<GeminiStreamChunk>>;
+}
 
 function buildSystemPrompt(context: string): string {
   return `You are the portfolio assistant for Andrei Kyle Hidalgo.
@@ -32,10 +47,10 @@ ${context}`;
 }
 
 export class GeminiChatProvider implements ChatProvider {
-  private readonly model: ChatGoogle;
+  private readonly model: GeminiStreamingModel;
 
-  constructor(config: GeminiProviderConfig) {
-    this.model = new ChatGoogle({
+  constructor(config: GeminiProviderConfig, model?: GeminiStreamingModel) {
+    this.model = model ?? new ChatGoogle({
       apiKey: config.apiKey,
       model: config.model,
       maxOutputTokens: 400,
@@ -75,9 +90,13 @@ export class GeminiChatProvider implements ChatProvider {
     }
     messages.push(new HumanMessage(input.question));
 
-    const chunks = await this.model.stream(messages, { signal: input.signal });
-    for await (const chunk of chunks) {
-      if (chunk.text) yield chunk.text;
+    try {
+      const chunks = await this.model.stream(messages, { signal: input.signal });
+      for await (const chunk of chunks) {
+        if (chunk.text) yield chunk.text;
+      }
+    } catch (error) {
+      throw normalizeChatProviderError(error);
     }
   }
 }

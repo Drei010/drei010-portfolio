@@ -63,18 +63,23 @@ describe("requestChatStream", () => {
   });
 
   it("maps HTTP and stream errors to safe typed client errors", async () => {
-    const limitedFetch: ChatFetch = async () =>
+    const unavailableFetch: ChatFetch = async () =>
       Response.json(
-        { error: { code: "rate_limited", message: "Wait before trying again." } },
-        { status: 429, headers: { "retry-after": "30" } }
+        {
+          error: {
+            code: "chat_unavailable",
+            message: "Chat is not configured right now.",
+          },
+        },
+        { status: 503 }
       );
 
     await expect(
-      collectEvents({ question: "Question", history: [] }, limitedFetch)
+      collectEvents({ question: "Question", history: [] }, unavailableFetch)
     ).rejects.toMatchObject({
       name: "ChatClientError",
-      code: "rate_limited",
-      retryAfter: 30,
+      code: "chat_unavailable",
+      status: 503,
     });
 
     const failedStream: ChatFetch = async () =>

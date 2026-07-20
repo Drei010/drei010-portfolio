@@ -4,7 +4,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ChatStreamEvent } from "@/lib/chat/contracts";
-import { requestChatStream } from "@/lib/chat/client";
+import { ChatClientError, requestChatStream } from "@/lib/chat/client";
 import { Terminal } from "@/components/cli/Terminal";
 
 vi.mock("@/lib/view-context", () => ({
@@ -88,6 +88,48 @@ describe("Terminal chat", () => {
     await waitFor(() => expect(requestChatStream).toHaveBeenCalledTimes(2));
     const secondRequest = vi.mocked(requestChatStream).mock.calls[1]?.[0];
     expect(secondRequest?.history).toEqual([]);
+  });
+
+  it("renders actionable classified provider errors", async () => {
+    vi.mocked(requestChatStream).mockImplementation(async function* () {
+      throw new ChatClientError(
+        "The configured AI model is unavailable. Please update GEMINI_MODEL.",
+        { code: "model_unavailable" }
+      );
+    });
+
+    const user = userEvent.setup();
+    render(<Terminal />);
+    await user.type(
+      screen.getByLabelText("Terminal command input"),
+      "Tell me about an unknown detail{Enter}"
+    );
+
+    expect(
+      await screen.findAllByText(
+        "The configured AI model is unavailable. Please update GEMINI_MODEL."
+      )
+    ).toHaveLength(2);
+    expect(screen.queryByText(/AI response was interrupted/i)).toBeNull();
+  });
+
+  it("uses a safe generic message for unknown stream failures", async () => {
+    vi.mocked(requestChatStream).mockImplementation(async function* () {
+      throw new Error("internal secret detail");
+    });
+
+    const user = userEvent.setup();
+    render(<Terminal />);
+    await user.type(
+      screen.getByLabelText("Terminal command input"),
+      "Tell me another unknown detail{Enter}"
+    );
+
+    expect(
+      await screen.findAllByText("The AI response failed. Please try again.")
+    ).toHaveLength(2);
+    expect(screen.queryByText(/internal secret detail/i)).toBeNull();
+    expect(screen.queryByText(/AI response was interrupted/i)).toBeNull();
   });
 
   it("cancels an active stream from the keyboard and marks partial output", async () => {

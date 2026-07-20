@@ -1,6 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { handleChatRequest, type ChatHandlerDependencies } from "@/lib/chat/server/handler";
-import type { ChatProvider, ChatProviderInput } from "@/lib/chat/server/provider";
+import {
+  handleChatRequest,
+  type ChatHandlerDependencies,
+} from "@/lib/chat/server/handler";
+import {
+  ChatProviderError,
+  type ChatProvider,
+  type ChatProviderInput,
+} from "@/lib/chat/server/provider";
 
 function makeRequest(body: unknown): Request {
   return new Request("http://localhost/api/chat", {
@@ -10,18 +17,9 @@ function makeRequest(body: unknown): Request {
   });
 }
 
-function makeDependencies(
-  provider: ChatProvider,
-  allowed = true
-): ChatHandlerDependencies {
+function makeDependencies(provider: ChatProvider): ChatHandlerDependencies {
   return {
     buildContext: () => "TRUSTED PORTFOLIO CONTEXT",
-    checkRateLimit: vi.fn(async () => ({
-      success: allowed,
-      limit: 10,
-      remaining: allowed ? 9 : 0,
-      reset: Date.now() + 60_000,
-    })),
     createProvider: vi.fn(() => provider),
   };
 }
@@ -59,23 +57,23 @@ describe("handleChatRequest", () => {
     expect(dependencies.createProvider).not.toHaveBeenCalled();
   });
 
-  it("returns rate-limit metadata without invoking the provider", async () => {
-    const provider: ChatProvider = {
-      async *stream() {
-        yield "unused";
-      },
+  it("returns a safe configuration error without exposing provider details", async () => {
+    const dependencies: ChatHandlerDependencies = {
+      buildContext: () => "TRUSTED PORTFOLIO CONTEXT",
+      createProvider: vi.fn(() => {
+        throw new Error("secret provider configuration detail");
+      }),
     };
-    const dependencies = makeDependencies(provider, false);
 
     const response = await handleChatRequest(
       makeRequest({ question: "Tell me about your experience", history: [] }),
       dependencies
     );
+    const body = await response.text();
 
-    expect(response.status).toBe(429);
-    expect(response.headers.get("retry-after")).toBeTruthy();
-    expect(response.headers.get("x-ratelimit-remaining")).toBe("0");
-    expect(dependencies.createProvider).not.toHaveBeenCalled();
+    expect(response.status).toBe(503);
+    expect(body).toContain("chat_unavailable");
+    expect(body).not.toContain("secret provider configuration detail");
   });
 
   it("streams provider text as ordered NDJSON using trusted context", async () => {
@@ -105,7 +103,9 @@ describe("handleChatRequest", () => {
       .map((line) => JSON.parse(line) as unknown);
 
     expect(response.status).toBe(200);
-    expect(response.headers.get("content-type")).toContain("application/x-ndjson");
+    expect(response.headers.get("content-type")).toContain(
+      "application/x-ndjson"
+    );
     expect(events).toEqual([
       { type: "token", text: "Hello " },
       { type: "token", text: "Andrei 👋" },
@@ -132,7 +132,29 @@ describe("handleChatRequest", () => {
 
     expect(body).toContain('"type":"token"');
     expect(body).toContain('"type":"error"');
+    expect(body).toContain('"code":"provider_error"');
+    expect(body).toContain("The AI response failed. Please try again.");
     expect(body).not.toContain("secret provider detail");
+  });
+
+  it("preserves actionable safe provider classifications", async () => {
+    const provider: ChatProvider = {
+      async *stream() {
+        throw new ChatProviderError(
+          "model_unavailable",
+          "The configured AI model is unavailable. Please update GEMINI_MODEL."
+        );
+      },
+    };
+    const response = await handleChatRequest(
+      makeRequest({ question: "Tell me more", history: [] }),
+      makeDependencies(provider)
+    );
+    const body = await response.text();
+
+    expect(body).toContain('"code":"model_unavailable"');
+    expect(body).toContain("Please update GEMINI_MODEL.");
+    expect(body).not.toContain("interrupted");
   });
 
   it("turns a zero-token provider completion into an error event", async () => {

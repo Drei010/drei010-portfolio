@@ -2,14 +2,15 @@ import {
   encodeChatStreamEvent,
   validateChatRequest,
 } from "@/lib/chat/contracts";
-import type { ChatProvider } from "@/lib/chat/server/provider";
-import type { RateLimitDecision } from "@/lib/chat/server/rate-limit";
+import {
+  normalizeChatProviderError,
+  type ChatProvider,
+} from "@/lib/chat/server/provider";
 
 const MAX_CHAT_BODY_BYTES = 32_768;
 
 export type ChatHandlerDependencies = {
   buildContext: () => string;
-  checkRateLimit: (request: Request) => Promise<RateLimitDecision>;
   createProvider: () => ChatProvider;
 };
 
@@ -28,14 +29,6 @@ function jsonError(status: number, code: string, message: string): Response {
       },
     }
   );
-}
-
-function rateLimitHeaders(decision: RateLimitDecision): HeadersInit {
-  return {
-    "X-RateLimit-Limit": String(decision.limit),
-    "X-RateLimit-Remaining": String(decision.remaining),
-    "X-RateLimit-Reset": String(decision.reset),
-  };
 }
 
 async function readJsonBody(request: Request): Promise<JsonBodyResult> {
@@ -93,7 +86,11 @@ export async function handleChatRequest(
     ?.trim()
     .toLowerCase();
   if (requestMediaType !== "application/json") {
-    return jsonError(415, "unsupported_media_type", "Content-Type must be application/json.");
+    return jsonError(
+      415,
+      "unsupported_media_type",
+      "Content-Type must be application/json."
+    );
   }
 
   const body = await readJsonBody(request);
@@ -106,34 +103,6 @@ export async function handleChatRequest(
   const validation = validateChatRequest(body.value);
   if (!validation.success) {
     return jsonError(400, "invalid_request", validation.message);
-  }
-
-  let rateLimit: RateLimitDecision;
-  try {
-    rateLimit = await dependencies.checkRateLimit(request);
-  } catch {
-    return jsonError(
-      503,
-      "chat_unavailable",
-      "Chat is not configured right now. Please try again later."
-    );
-  }
-
-  if (!rateLimit.success) {
-    const retryAfter = Math.max(
-      1,
-      Math.ceil((rateLimit.reset - Date.now()) / 1_000)
-    );
-    const response = jsonError(
-      429,
-      "rate_limited",
-      "Too many AI questions. Please wait before trying again."
-    );
-    for (const [name, value] of Object.entries(rateLimitHeaders(rateLimit))) {
-      response.headers.set(name, value);
-    }
-    response.headers.set("Retry-After", String(retryAfter));
-    return response;
   }
 
   let provider: ChatProvider;
@@ -179,13 +148,14 @@ export async function handleChatRequest(
                 })
           );
         }
-      } catch {
+      } catch (error) {
         if (!abortController.signal.aborted) {
+          const providerError = normalizeChatProviderError(error);
           controller.enqueue(
             encodeChatStreamEvent({
               type: "error",
-              code: "provider_error",
-              message: "The AI response was interrupted. Please try again.",
+              code: providerError.code,
+              message: providerError.clientMessage,
             })
           );
         }
@@ -207,7 +177,6 @@ export async function handleChatRequest(
       "Cache-Control": "no-store, no-transform",
       "Content-Type": "application/x-ndjson; charset=utf-8",
       "X-Content-Type-Options": "nosniff",
-      ...rateLimitHeaders(rateLimit),
     },
   });
 }
