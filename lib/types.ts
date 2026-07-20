@@ -44,13 +44,25 @@ export type TerminalLine = {
   id: string;
   segments: OutputSegment[];
   isCommand?: boolean;
+  isStreaming?: boolean;
   centered?: boolean;
+};
+
+export type ChatCommandRequest = {
+  question: string;
+};
+
+export type ChatCommandExchange = {
+  question: string;
+  answer: string;
 };
 
 export type CommandResult = {
   lines: TerminalLine[];
   clear?: boolean;
   switchView?: ViewMode;
+  chatRequest?: ChatCommandRequest;
+  chatExchange?: ChatCommandExchange;
 };
 
 export type Service = {

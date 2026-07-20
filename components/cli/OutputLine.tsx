@@ -27,6 +27,11 @@ export function OutputLine({ line }: OutputLineProps) {
             {segment.text}
           </span>
         ))}
+        {line.isStreaming ? (
+          <span className="animate-pulse text-terminal-prompt" aria-hidden="true">
+            ▌
+          </span>
+        ) : null}
       </div>
     </div>
   );

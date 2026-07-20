@@ -1,13 +1,22 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  type KeyboardEvent,
+} from "react";
 import { OutputLine } from "@/components/cli/OutputLine";
 import { CommandInput } from "@/components/cli/CommandInput";
-import { TerminalLine } from "@/lib/types";
+import type { ChatHistoryMessage } from "@/lib/chat/contracts";
+import { ChatClientError, requestChatStream } from "@/lib/chat/client";
+import { appendChatExchange } from "@/lib/chat/session";
 import { executeCommand } from "@/lib/cli/commands";
 import { useCommandHistory } from "@/lib/cli/history";
 import { getCompletion } from "@/lib/cli/autocomplete";
 import { useView } from "@/lib/view-context";
+import type { TerminalLine } from "@/lib/types";
 import { ASCII_ART, ASCII_ART_MOBILE } from "@/lib/data/ascii-art";
 
 function buildAsciiLines(art: string): TerminalLine[] {
@@ -75,6 +84,28 @@ function getWelcomeLines(isMobile: boolean): TerminalLine[] {
   ];
 }
 
+function getChatErrorMessage(error: unknown): string {
+  if (error instanceof ChatClientError) return error.message;
+  return "The AI response failed. Please try again.";
+}
+
+function updateTerminalLine(
+  lines: readonly TerminalLine[],
+  id: string,
+  text: string,
+  isStreaming: boolean
+): TerminalLine[] {
+  return lines.map((line) =>
+    line.id === id
+      ? {
+          ...line,
+          isStreaming,
+          segments: [{ text, color: "default" }],
+        }
+      : line
+  );
+}
+
 export function Terminal() {
   const [lines, setLines] = useState<TerminalLine[]>(() => {
     const mobile = typeof window !== "undefined" && window.innerWidth < 640;
@@ -82,9 +113,12 @@ export function Terminal() {
   });
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
   const submittingRef = useRef(false);
+  const activeRequestRef = useRef<AbortController | null>(null);
+  const chatHistoryRef = useRef<ChatHistoryMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { setView } = useView();
+  const { view, setView } = useView();
   const { add, navigateUp, navigateDown, resetNavigation } = useCommandHistory();
 
   const scrollToBottom = useCallback(() => {
@@ -96,6 +130,92 @@ export function Terminal() {
   useEffect(() => {
     scrollToBottom();
   }, [lines, scrollToBottom]);
+
+  useEffect(() => {
+    if (view !== "cli") activeRequestRef.current?.abort();
+  }, [view]);
+
+  useEffect(() => {
+    return () => activeRequestRef.current?.abort();
+  }, []);
+
+  const streamChatResponse = useCallback(async (question: string) => {
+    const responseId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const spacerId = `chat-space-${Date.now()}`;
+    const abortController = new AbortController();
+    activeRequestRef.current = abortController;
+    let accumulatedResponse = "";
+    let completed = false;
+
+    setLines((previous) => [
+      ...previous,
+      { id: spacerId, segments: [{ text: "" }] },
+      {
+        id: responseId,
+        segments: [{ text: "", color: "default" }],
+        isStreaming: true,
+      },
+    ]);
+    setAnnouncement("AI response started.");
+
+    try {
+      for await (const event of requestChatStream(
+        { question, history: chatHistoryRef.current },
+        { signal: abortController.signal }
+      )) {
+        if (event.type === "token") {
+          accumulatedResponse += event.text;
+          setLines((previous) =>
+            updateTerminalLine(previous, responseId, accumulatedResponse, true)
+          );
+        } else if (event.type === "done") {
+          completed = true;
+        }
+      }
+
+      if (completed && !accumulatedResponse.trim()) {
+        throw new ChatClientError("The AI returned an empty response. Please try again.", {
+          code: "empty_response",
+        });
+      }
+
+      if (completed) {
+        setLines((previous) => [
+          ...updateTerminalLine(
+            previous,
+            responseId,
+            accumulatedResponse,
+            false
+          ),
+          { id: `${responseId}-space`, segments: [{ text: "" }] },
+        ]);
+        chatHistoryRef.current = appendChatExchange(
+          chatHistoryRef.current,
+          question,
+          accumulatedResponse
+        );
+        setAnnouncement("AI response complete.");
+      }
+    } catch (error) {
+      const cancelled = abortController.signal.aborted;
+      const message = cancelled
+        ? "Response cancelled."
+        : getChatErrorMessage(error);
+      const displayText = accumulatedResponse
+        ? `${accumulatedResponse}\n[${message}]`
+        : message;
+
+      setLines((previous) => [
+        ...updateTerminalLine(previous, responseId, displayText, false),
+        { id: `${responseId}-space`, segments: [{ text: "" }] },
+      ]);
+      setAnnouncement(message);
+    } finally {
+      if (activeRequestRef.current === abortController) {
+        activeRequestRef.current = null;
+      }
+    }
+  }, []);
 
   const handleSubmit = useCallback(
     async (command: string) => {
@@ -121,11 +241,27 @@ export function Terminal() {
       try {
         const result = await executeCommand(trimmed);
         if (result.clear) {
+          activeRequestRef.current?.abort();
+          chatHistoryRef.current = [];
           setLines([]);
+          setAnnouncement("Terminal and chat history cleared.");
         } else if (result.switchView) {
+          activeRequestRef.current?.abort();
           setView(result.switchView);
         } else {
-          setLines((previous) => [...previous, ...result.lines]);
+          if (result.lines.length > 0) {
+            setLines((previous) => [...previous, ...result.lines]);
+          }
+          if (result.chatExchange) {
+            chatHistoryRef.current = appendChatExchange(
+              chatHistoryRef.current,
+              result.chatExchange.question,
+              result.chatExchange.answer
+            );
+            setAnnouncement("Prepared answer displayed.");
+          } else if (result.chatRequest) {
+            await streamChatResponse(result.chatRequest.question);
+          }
         }
       } catch {
         setLines((previous) => [
@@ -140,26 +276,37 @@ export function Terminal() {
             ],
           },
         ]);
+        setAnnouncement("Command failed. Please try again.");
       } finally {
         submittingRef.current = false;
         setIsSubmitting(false);
       }
     },
-    [add, resetNavigation, setView]
+    [add, resetNavigation, setView, streamChatResponse]
   );
 
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        const prev = navigateUp();
-        if (prev !== null) setInput(prev);
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      const isCancelKey =
+        event.key === "Escape" ||
+        ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c");
+      if (isCancelKey && activeRequestRef.current) {
+        event.preventDefault();
+        activeRequestRef.current.abort();
+        return;
+      }
+      if (submittingRef.current) return;
+
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        const previous = navigateUp();
+        if (previous !== null) setInput(previous);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
         const next = navigateDown();
         setInput(next ?? "");
-      } else if (e.key === "Tab") {
-        e.preventDefault();
+      } else if (event.key === "Tab") {
+        event.preventDefault();
         const completed = getCompletion(input);
         if (completed) setInput(completed);
       }
@@ -169,28 +316,34 @@ export function Terminal() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-terminal-bg font-mono text-sm">
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </p>
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto p-4 scrollbar-hidden"
+        className="flex min-h-0 flex-1 flex-col justify-start overflow-y-auto scrollbar-hidden"
+        aria-busy={isSubmitting}
         onClick={() => {
-          const inputEl = document.querySelector<HTMLInputElement>(
+          const inputElement = document.querySelector<HTMLInputElement>(
             'input[aria-label="Terminal command input"]'
           );
-          inputEl?.focus();
+          inputElement?.focus();
         }}
       >
-        {lines.map((line) => (
-          <OutputLine key={line.id} line={line} />
-        ))}
-      </div>
-      <div className="border-t border-border/30 p-4">
-        <CommandInput
-          value={input}
-          onChange={setInput}
-          onSubmit={handleSubmit}
-          onKeyDown={handleKeyDown}
-          disabled={isSubmitting}
-        />
+        <div className="w-full p-4">
+          {lines.map((line) => (
+            <OutputLine key={line.id} line={line} />
+          ))}
+          <div className="mt-4">
+            <CommandInput
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSubmit}
+              onKeyDown={handleKeyDown}
+              busy={isSubmitting}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
