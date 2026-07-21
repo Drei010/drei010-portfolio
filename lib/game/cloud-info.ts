@@ -5,8 +5,37 @@ const FADE_OUT_SPEED = 0.015;
 const MAX_LIFETIME = 420;
 const FLOAT_SPEED = 0.3;
 const CARD_WIDTH = 440;
-const CARD_HEIGHT_ESTIMATE = 250;
 const CARD_SPACING = 20;
+
+// Terrain surface renders at screen Y ≈ TERRAIN_LINE_BASE + canvasHeight * TERRAIN_LINE_FACTOR
+// (derived from the camera's vertical framing in camera.ts). Popups must stay
+// fully above this line — with margin — on every screen size, or they render
+// behind the hill fill.
+const TERRAIN_LINE_BASE = 91;
+const TERRAIN_LINE_FACTOR = 0.65;
+const TERRAIN_SAFETY_MARGIN = 40;
+// Reserve room for the top HUD overlay so popups never sit under it.
+const TOP_SAFE_MARGIN = 56;
+
+function getTerrainLineY(canvasHeight: number): number {
+  return TERRAIN_LINE_BASE + canvasHeight * TERRAIN_LINE_FACTOR;
+}
+
+// Scale card size/typography down on short canvases so popups fit within the
+// reduced sky band without being cut off or overlapping the terrain/controls.
+export function getCloudInfoScale(canvasHeight: number): number {
+  if (canvasHeight <= 0) return 1;
+  return Math.max(0.55, Math.min(1, canvasHeight / 500));
+}
+
+function getCardHeightEstimate(canvasHeight: number): number {
+  // Approximate worst-case card height at the given scale, matching the
+  // maxContentLines budget used in renderCloudInfos for the same scale.
+  const scale = getCloudInfoScale(canvasHeight);
+  const maxContentLines = scale < 0.75 ? 5 : 8;
+  const fullHeight = 24 + 26 + 12 + 22 + 12 + maxContentLines * 24 + 24;
+  return fullHeight * scale;
+}
 
 export function createCloudInfo(
   type: CollectibleType,
@@ -14,10 +43,16 @@ export function createCloudInfo(
   content: string,
   cameraX: number,
   canvasWidth: number,
-  existingInfos?: CloudInfo[]
+  existingInfos?: CloudInfo[],
+  canvasHeight?: number
 ): CloudInfo {
   // Find a non-overlapping position
-  const { x, y } = findNonOverlappingPosition(cameraX, canvasWidth, existingInfos ?? []);
+  const { x, y } = findNonOverlappingPosition(
+    cameraX,
+    canvasWidth,
+    existingInfos ?? [],
+    canvasHeight ?? 900
+  );
 
   return {
     id: `cloud-${Date.now()}-${Math.random()}`,
@@ -38,15 +73,29 @@ export function createCloudInfo(
 function findNonOverlappingPosition(
   cameraX: number,
   canvasWidth: number,
-  existingInfos: CloudInfo[]
+  existingInfos: CloudInfo[],
+  canvasHeight: number
 ): { x: number; y: number } {
-  // Define slots where popups can appear — closer to ground, in front of car
+  const cardHeightEstimate = getCardHeightEstimate(canvasHeight);
+  const terrainLineY = getTerrainLineY(canvasHeight);
+  // Bottom-most Y a card's top edge can use while keeping its full height
+  // above the terrain line (with margin).
+  const maxSlotY = Math.max(
+    TOP_SAFE_MARGIN,
+    terrainLineY - TERRAIN_SAFETY_MARGIN - cardHeightEstimate
+  );
+  // Distribute slots evenly within the available sky band instead of using
+  // fixed absolute pixel values, so they always land above the terrain line.
+  const availableBand = Math.max(0, maxSlotY - TOP_SAFE_MARGIN);
+  const slotFractions = [0, 0.5, 1, 0.25, 0.75];
+  const slotYs = slotFractions.map((f) => TOP_SAFE_MARGIN + availableBand * f);
+
   const slots = [
-    { x: cameraX + canvasWidth * 0.55, y: 250 },
-    { x: cameraX + canvasWidth * 0.75, y: 250 },
-    { x: cameraX + canvasWidth * 0.55, y: 380 },
-    { x: cameraX + canvasWidth * 0.75, y: 380 },
-    { x: cameraX + canvasWidth * 0.65, y: 315 },
+    { x: cameraX + canvasWidth * 0.55, y: slotYs[0] },
+    { x: cameraX + canvasWidth * 0.75, y: slotYs[1] },
+    { x: cameraX + canvasWidth * 0.55, y: slotYs[2] },
+    { x: cameraX + canvasWidth * 0.75, y: slotYs[3] },
+    { x: cameraX + canvasWidth * 0.65, y: slotYs[4] },
   ];
 
   // Find the first slot that doesn't overlap with any existing visible popup
@@ -55,7 +104,7 @@ function findNonOverlappingPosition(
       if (info.opacity <= 0) return false;
       const dx = Math.abs(slot.x - info.x);
       const dy = Math.abs(slot.y - info.y);
-      return dx < CARD_WIDTH + CARD_SPACING && dy < CARD_HEIGHT_ESTIMATE + CARD_SPACING;
+      return dx < CARD_WIDTH + CARD_SPACING && dy < cardHeightEstimate + CARD_SPACING;
     });
 
     if (!overlaps) {
@@ -66,7 +115,10 @@ function findNonOverlappingPosition(
   // Fallback: use offset position if all slots taken
   return {
     x: cameraX + canvasWidth * 0.55 + existingInfos.length * 60,
-    y: 250 + (existingInfos.length % 3) * (CARD_HEIGHT_ESTIMATE + CARD_SPACING),
+    y:
+      TOP_SAFE_MARGIN +
+      (existingInfos.length % 3) *
+        Math.min(cardHeightEstimate + CARD_SPACING, availableBand || cardHeightEstimate),
   };
 }
 
@@ -102,8 +154,11 @@ export function updateCloudInfos(infos: CloudInfo[]): CloudInfo[] {
 export function renderCloudInfos(
   ctx: CanvasRenderingContext2D,
   infos: CloudInfo[],
-  camera: CameraState
+  camera: CameraState,
+  canvasHeight: number
 ): void {
+  const sizeScale = getCloudInfoScale(canvasHeight);
+
   for (const info of infos) {
     const screenX = info.x - camera.x;
     const screenY = info.y;
@@ -111,10 +166,10 @@ export function renderCloudInfos(
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.translate(screenX, screenY);
-    ctx.scale(info.scale, info.scale);
+    ctx.scale(info.scale * sizeScale, info.scale * sizeScale);
     ctx.globalAlpha = info.opacity;
 
-    const cardWidth = 440;
+    const cardWidth = CARD_WIDTH;
     const padding = 24;
     const badgeHeight = 26;
     const badgeMarginBottom = 12;
@@ -122,7 +177,7 @@ export function renderCloudInfos(
     const titleMarginBottom = 12;
     const contentFontSize = 15;
     const contentLineHeight = 24;
-    const maxContentLines = 8;
+    const maxContentLines = sizeScale < 0.75 ? 5 : 8;
 
     // Measure content to determine card height
     ctx.font = `${contentFontSize}px monospace`;

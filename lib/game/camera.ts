@@ -34,13 +34,15 @@ export function updateCamera(
   const targetX = vehicleX + lookahead - canvasWidth * 0.35;
   const targetY = vehicleY + OFFSET_Y - canvasHeight * 0.65;
 
-  // Smooth interpolation with separate X/Y speeds
-  const newX = camera.x + (targetX - camera.x) * LERP_SPEED_X;
-  const newY = camera.y + (targetY - camera.y) * LERP_SPEED_Y;
+  // Snap to target on first frame so the vehicle is immediately visible
+  const firstFrame = camera.x === 0 && camera.y === 0 && camera.targetX === 0 && camera.targetY === 0;
+
+  const newX = firstFrame ? targetX : camera.x + (targetX - camera.x) * LERP_SPEED_X;
+  const newY = firstFrame ? targetY : camera.y + (targetY - camera.y) * LERP_SPEED_Y;
 
   return {
     x: newX,
-    y: Math.min(newY, 0),
+    y: newY,
     targetX,
     targetY,
     smoothedVelocityX,

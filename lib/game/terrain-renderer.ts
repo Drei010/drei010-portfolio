@@ -1,11 +1,16 @@
 import { TerrainChunk } from "./types";
 
 const BASE_HEIGHT = 550;
+// World-space bottom bound for closing the terrain fill polygon.
+// Must stay safely below the lowest possible terrain surface Y
+// (BASE_HEIGHT + max noise amplitude) regardless of canvas size —
+// using screen-space canvasHeight here would invert the fill on
+// short canvases where canvasHeight is smaller than the terrain surface Y.
+const FILL_BOTTOM_Y = BASE_HEIGHT + 500;
 
 export function renderTerrain(
   ctx: CanvasRenderingContext2D,
-  chunks: TerrainChunk[],
-  canvasHeight: number
+  chunks: TerrainChunk[]
 ): void {
   if (chunks.length === 0) return;
 
@@ -38,8 +43,8 @@ export function renderTerrain(
   ctx.lineTo(last.x, last.y);
 
   // Close path at bottom
-  ctx.lineTo(last.x, canvasHeight + 200);
-  ctx.lineTo(allVertices[0].x, canvasHeight + 200);
+  ctx.lineTo(last.x, FILL_BOTTOM_Y);
+  ctx.lineTo(allVertices[0].x, FILL_BOTTOM_Y);
   ctx.closePath();
 
   // Gradient fill

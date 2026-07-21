@@ -125,7 +125,8 @@ export function updateGame(
         portfolioItem.content,
         camera.x,
         canvasWidth,
-        cloudInfos
+        cloudInfos,
+        canvasHeight
       );
       cloudInfos.push(cloudInfo);
       score += 10;
@@ -165,7 +166,7 @@ export function renderGame(
   renderBackground(ctx, canvasWidth, canvasHeight, state.camera);
 
   // Cloud infos (screen-space, rendered in background area)
-  renderCloudInfos(ctx, state.cloudInfos, state.camera);
+  renderCloudInfos(ctx, state.cloudInfos, state.camera, canvasHeight);
 
   // Show instructions as static hero text in the clouds before game starts
   if (!state.started) {
@@ -176,7 +177,7 @@ export function renderGame(
   applyCameraTransform(ctx, state.camera);
 
   // Terrain
-  renderTerrain(ctx, state.terrain.chunks, canvasHeight);
+  renderTerrain(ctx, state.terrain.chunks);
 
   // Collectibles
   renderCollectibles(ctx, state.collectibles.items, time);
