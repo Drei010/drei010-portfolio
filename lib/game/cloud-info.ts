@@ -1,4 +1,5 @@
 import { CloudInfo, CollectibleType, CameraState } from "./types";
+import { getCameraZoom } from "./camera";
 
 const FADE_IN_SPEED = 0.02;
 const FADE_OUT_SPEED = 0.015;
@@ -7,10 +8,11 @@ const FLOAT_SPEED = 0.3;
 const CARD_WIDTH = 440;
 const CARD_SPACING = 20;
 
-// Terrain surface renders at screen Y ≈ TERRAIN_LINE_BASE + canvasHeight * TERRAIN_LINE_FACTOR
-// (derived from the camera's vertical framing in camera.ts). Popups must stay
-// fully above this line — with margin — on every screen size, or they render
-// behind the hill fill.
+// Terrain surface renders at screen Y ≈ TERRAIN_LINE_BASE * zoom + canvasHeight * TERRAIN_LINE_FACTOR
+// (derived algebraically from the camera's vertical framing + zoom in camera.ts:
+// terrainScreenY = (BASE_HEIGHT - vehicleY - OFFSET_Y) * zoom + canvasHeight * 0.65).
+// Popups must stay fully above this line — with margin — on every screen size
+// and zoom level, or they render behind the hill fill.
 const TERRAIN_LINE_BASE = 91;
 const TERRAIN_LINE_FACTOR = 0.65;
 const TERRAIN_SAFETY_MARGIN = 40;
@@ -18,23 +20,68 @@ const TERRAIN_SAFETY_MARGIN = 40;
 const TOP_SAFE_MARGIN = 56;
 
 function getTerrainLineY(canvasHeight: number): number {
-  return TERRAIN_LINE_BASE + canvasHeight * TERRAIN_LINE_FACTOR;
+  const zoom = getCameraZoom(canvasHeight);
+  return TERRAIN_LINE_BASE * zoom + canvasHeight * TERRAIN_LINE_FACTOR;
 }
 
-// Scale card size/typography down on short canvases so popups fit within the
-// reduced sky band without being cut off or overlapping the terrain/controls.
+const PADDING = 24;
+const BADGE_HEIGHT = 26;
+const BADGE_MARGIN_BOTTOM = 12;
+const TITLE_FONT_SIZE = 20;
+const TITLE_MARGIN_BOTTOM = 12;
+const CONTENT_LINE_HEIGHT = 24;
+const CARD_CHROME_HEIGHT =
+  PADDING + BADGE_HEIGHT + BADGE_MARGIN_BOTTOM + TITLE_FONT_SIZE + 2 + TITLE_MARGIN_BOTTOM + PADDING;
+const FULL_CONTENT_LINES = 8;
+const COMPACT_CONTENT_LINES = 5;
+const MIN_CARD_SCALE = 0.5;
+
+function cardHeightForLines(lines: number): number {
+  return CARD_CHROME_HEIGHT + lines * CONTENT_LINE_HEIGHT;
+}
+
+type CloudInfoSizing = {
+  scale: number;
+  maxContentLines: number;
+  cardHeightEstimate: number;
+};
+
+// Determines card scale and max content lines from the sky band actually
+// available above the terrain line, so popups fit without being cut off or
+// rendering behind the hills — correct across every screen size and zoom level.
+function getCloudInfoSizing(canvasHeight: number): CloudInfoSizing {
+  if (canvasHeight <= 0) {
+    return {
+      scale: 1,
+      maxContentLines: FULL_CONTENT_LINES,
+      cardHeightEstimate: cardHeightForLines(FULL_CONTENT_LINES),
+    };
+  }
+
+  const terrainLineY = getTerrainLineY(canvasHeight);
+  const availableBand = terrainLineY - TERRAIN_SAFETY_MARGIN - TOP_SAFE_MARGIN;
+  const fullHeight = cardHeightForLines(FULL_CONTENT_LINES);
+
+  if (availableBand >= fullHeight) {
+    return { scale: 1, maxContentLines: FULL_CONTENT_LINES, cardHeightEstimate: fullHeight };
+  }
+
+  const compactHeight = cardHeightForLines(COMPACT_CONTENT_LINES);
+  const scale = Math.max(MIN_CARD_SCALE, Math.min(1, availableBand / compactHeight));
+
+  return {
+    scale,
+    maxContentLines: COMPACT_CONTENT_LINES,
+    cardHeightEstimate: compactHeight * scale,
+  };
+}
+
 export function getCloudInfoScale(canvasHeight: number): number {
-  if (canvasHeight <= 0) return 1;
-  return Math.max(0.55, Math.min(1, canvasHeight / 500));
+  return getCloudInfoSizing(canvasHeight).scale;
 }
 
 function getCardHeightEstimate(canvasHeight: number): number {
-  // Approximate worst-case card height at the given scale, matching the
-  // maxContentLines budget used in renderCloudInfos for the same scale.
-  const scale = getCloudInfoScale(canvasHeight);
-  const maxContentLines = scale < 0.75 ? 5 : 8;
-  const fullHeight = 24 + 26 + 12 + 22 + 12 + maxContentLines * 24 + 24;
-  return fullHeight * scale;
+  return getCloudInfoSizing(canvasHeight).cardHeightEstimate;
 }
 
 export function createCloudInfo(
@@ -157,7 +204,7 @@ export function renderCloudInfos(
   camera: CameraState,
   canvasHeight: number
 ): void {
-  const sizeScale = getCloudInfoScale(canvasHeight);
+  const { scale: sizeScale, maxContentLines } = getCloudInfoSizing(canvasHeight);
 
   for (const info of infos) {
     const screenX = info.x - camera.x;
@@ -170,14 +217,13 @@ export function renderCloudInfos(
     ctx.globalAlpha = info.opacity;
 
     const cardWidth = CARD_WIDTH;
-    const padding = 24;
-    const badgeHeight = 26;
-    const badgeMarginBottom = 12;
-    const titleFontSize = 20;
-    const titleMarginBottom = 12;
+    const padding = PADDING;
+    const badgeHeight = BADGE_HEIGHT;
+    const badgeMarginBottom = BADGE_MARGIN_BOTTOM;
+    const titleFontSize = TITLE_FONT_SIZE;
+    const titleMarginBottom = TITLE_MARGIN_BOTTOM;
     const contentFontSize = 15;
-    const contentLineHeight = 24;
-    const maxContentLines = sizeScale < 0.75 ? 5 : 8;
+    const contentLineHeight = CONTENT_LINE_HEIGHT;
 
     // Measure content to determine card height
     ctx.font = `${contentFontSize}px monospace`;

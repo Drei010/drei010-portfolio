@@ -42,6 +42,7 @@ export type CameraState = {
   targetX: number;
   targetY: number;
   smoothedVelocityX: number;
+  zoom: number;
 };
 
 export type CollectibleType = "about" | "skills" | "projects" | "contact" | "services";
