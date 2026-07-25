@@ -1,29 +1,20 @@
 # Andrei Kyle Hidalgo — Developer Portfolio
 
-A tri-view developer portfolio built with Next.js, TypeScript, and Tailwind CSS. It combines a minimalist web portfolio, an interactive CLI with a local-first Gemini chatbot, and a Hill Climb Racing game mode.
+A tri-view developer portfolio built with Next.js, TypeScript, and Tailwind CSS: a web portfolio, an interactive CLI with an AI chatbot, and a Hill Climb Racing–style game mode.
 
 ## Features
 
-- **Web View** — Responsive About, Services, Skills, Projects, and Contact sections.
-- **CLI View** — Terminal commands, history, tab completion, prepared portfolio answers, contextual AI follow-ups, and live token streaming.
-- **Game View** — Procedural terrain, collectible portfolio items, and Matter.js vehicle physics.
-- **Local-first chat** — Curated answers are resolved in the browser before any AI request is made.
-- **Provider-neutral AI** — Gemini is isolated behind a server-side streaming provider contract so another provider can be added later.
-- **AI safeguards** — Strict request bounds, portfolio-only context, explicit Gemini safety settings, no model tools, and safe provider errors.
-- **Accessible interaction** — Keyboard and touch support, reduced-motion handling, stream status announcements, and cancellable AI output.
+- **Web View** — About, Services, Skills, Projects, and Contact sections.
+- **CLI View** — Terminal-style commands with an AI-powered chatbot.
+- **Game View** — Procedural terrain and vehicle physics built with Matter.js.
 
 ## Tech Stack
 
-- **Framework:** Next.js 16 App Router
-- **Language:** TypeScript in strict mode
-- **UI:** React 19, Tailwind CSS v4, Motion
-- **AI:** LangChain `@langchain/google` with Gemini
-- **Game physics:** Matter.js and HTML5 Canvas
-- **Testing:** Vitest, Testing Library, jsdom, and repository-specific Node checks
+Next.js (App Router) · TypeScript · React · Tailwind CSS · Matter.js · LangChain + Gemini · Vitest
 
 ## Getting Started
 
-Requirements: Node.js 20 or newer and npm.
+Requirements: Node.js 20+ and npm.
 
 ```bash
 npm install
@@ -31,170 +22,25 @@ cp .env.example .env
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Prepared CLI answers work without external credentials. Gemini fallback requests return a safe configuration error until a Gemini API key is configured.
+Open [http://localhost:3000](http://localhost:3000). The site works fully without any API keys — the AI chatbot is optional and only activates once a Gemini key is added.
 
 ## Environment Configuration
 
-The repository includes a secret-free `.env.example`; local `.env*` files remain ignored. Never prefix these values with `NEXT_PUBLIC_` or commit real credentials.
+Copy `.env.example` to `.env` and add your own Gemini API key to enable the AI chatbot:
 
 ```dotenv
-CHAT_PROVIDER=gemini
-GOOGLE_API_KEY=
-GEMINI_MODEL=gemini-flash-lite-latest
+GOOGLE_API_KEY=your-key-here
 ```
 
-| Variable | Purpose |
-| --- | --- |
-| `CHAT_PROVIDER` | Provider selected by the server factory. Currently accepts `gemini`. |
-| `GOOGLE_API_KEY` | Server-only Gemini API key from Google AI Studio. |
-| `GEMINI_MODEL` | Gemini model ID. The template uses `gemini-flash-lite-latest`; change it without modifying UI code. |
-
-### Configure Gemini
-
-1. Open [Google AI Studio](https://aistudio.google.com/app/apikey).
-2. Create an API key for the intended Google project.
-3. Set `GOOGLE_API_KEY` in `.env` locally and in the deployment environment.
-4. Confirm that `GEMINI_MODEL` is available to that project.
-
-## Using the CLI Chatbot
-
-Use explicit `ask` syntax or type a natural multi-word question:
-
-```text
-ask What projects have you built?
-What experience do you have with AI?
-hello
-```
-
-Resolution order:
-
-1. Exact CLI commands such as `projects`, `skills`, or `contact` take priority.
-2. The deterministic matcher checks prepared aliases and whole-word keywords.
-3. Unknown single-word input such as `skils` remains a command error.
-4. An unmatched explicit or conversational question is sent to `/api/chat` with bounded session history.
-5. Gemini tokens stream into one stable terminal line as they arrive.
-
-Prepared answers stay entirely in the browser and do not call the API. Chat history exists only in memory for the current CLI session. `clear` resets both terminal output and chat history; refresh also starts a new session. Press `Ctrl+C`, `Cmd+C`, or `Escape` to cancel an active response.
-
-## Chat Architecture
-
-```text
-CLI input
-  ├─ known command ───────────────> local command output
-  └─ question
-       ├─ prepared match ─────────> local answer, no API request
-       └─ miss ───────────────────> POST /api/chat
-                                      ├─ content type and body bounds
-                                      ├─ question and history validation
-                                      ├─ trusted portfolio context
-                                      ├─ ChatProvider factory
-                                      └─ Gemini NDJSON token stream
-```
-
-Shared contracts live in `lib/chat/contracts.ts`. The browser parser in `lib/chat/client.ts` consumes strict newline-delimited events:
-
-- `{ "type": "token", "text": "..." }`
-- `{ "type": "done" }`
-- `{ "type": "error", "code": "...", "message": "..." }`
-
-The API and UI depend on `ChatProvider`, not Gemini-specific types. `GeminiChatProvider` is the only LangChain/Google adapter.
-
-## Customizing Prepared Answers
-
-Edit `lib/data/cli-answers.ts`. Each typed entry defines:
-
-- a stable intent ID;
-- exact normalized aliases;
-- whole-word keywords and a minimum match count;
-- deterministic priority;
-- the displayed response.
-
-Factual answers derive values from the canonical files in `lib/data/` where possible. The matcher normalizes case, Unicode marks, punctuation, and whitespace and does not perform substring matching.
-
-## Adding Another AI Provider
-
-1. Implement `ChatProvider` from `lib/chat/server/provider.ts` in a server-only module.
-2. Convert provider chunks into plain text from its `stream()` async iterable.
-3. Add the provider to `lib/chat/server/provider-factory.ts` and introduce only server-side environment variables.
-4. Keep provider errors behind the existing safe NDJSON error contract.
-5. Add contract tests with a fake provider; do not make live provider calls in CI.
-
-No terminal, command-routing, session-history, or API protocol changes should be necessary.
-
-## Security Model
-
-- Gemini credentials are read only by server modules.
-- The model receives only public data assembled from canonical portfolio files.
-- User questions and history are untrusted, separately role-tagged, and strictly bounded.
-- The endpoint rejects unsupported media types, malformed payloads, and oversized bodies before provider invocation.
-- The system prompt requires portfolio-only answers and missing-information declines.
-- Gemini safety filters are explicitly enabled for harassment, hate speech, sexual content, and dangerous content.
-- Tools, code execution, web search, URL retrieval, filesystem access, and autonomous actions are not enabled.
-- Model text is rendered by React as plain text; it is never interpreted as HTML.
-- Provider errors, prompts, stack traces, and credentials are not returned to clients.
-- Prompt-injection defenses reduce exposure but cannot guarantee model compliance; keep the model least-privileged and test adversarial inputs when prompts or providers change.
-
-## Project Structure
-
-```text
-├── app/
-│   └── api/chat/                 # Validated streamed chat route
-├── components/
-│   ├── cli/                      # Terminal input and streamed output UI
-│   ├── game/                     # Game canvas, controls, and HUD
-│   └── web/                      # Portfolio sections
-├── lib/
-│   ├── chat/                     # Shared contracts, client parser, session helpers
-│   │   └── server/               # Context, provider adapters, and handler
-│   ├── cli/                      # Commands, matching, autocomplete, history
-│   ├── data/                     # Canonical portfolio and prepared-answer data
-│   └── game/                     # Physics, terrain, rendering, and state
-├── scripts/                      # Repository and physics checks
-└── public/                       # Static assets
-```
+Get a free key from [Google AI Studio](https://aistudio.google.com/app/apikey). Never commit `.env` — it's gitignored and read only on the server, never exposed to the browser.
 
 ## Quality Checks
-
-Run the same aggregate validation used before a pull request:
 
 ```bash
 npm run check
 ```
 
-Individual commands:
-
-```bash
-npm run typecheck
-npm run lint
-npm run test:repo
-npm run test:physics
-npm run test:chat
-npm run build
-```
-
-`test:chat` covers prepared routing, strict API validation, Unicode-safe NDJSON parsing, progressive terminal rendering, safe provider failures, bounded session history, cancellation, and session reset behavior. Real Gemini calls are intentionally excluded from automated tests.
-
-## Troubleshooting
-
-- **“Chat is not configured”** — Confirm `GOOGLE_API_KEY` is non-empty and restart the development server.
-- **Prepared answers work but AI questions fail** — This is expected when the Gemini credential is absent; local matching bypasses the API.
-- **Model unavailable** — Verify `GEMINI_MODEL` against the models enabled for the Google project; the template uses the tested `gemini-flash-lite-latest` alias.
-- **AI service temporarily busy** — Retry shortly; transient provider capacity errors are reported separately from model-configuration failures.
-- **Response failed** — Retry after checking network connectivity and provider status. Partial responses are not added to session history.
-- **Build succeeds without credentials** — Expected. The provider initializes lazily when an AI request reaches the route.
-
-## Interaction and Accessibility Support
-
-- Game mode supports keyboard and coarse-pointer/touch controls.
-- Interrupted input is cleared on cancellation, blur, visibility loss, navigation, and unmount where applicable.
-- Motion respects `prefers-reduced-motion`.
-- Dialogs trap and restore focus and lock the portfolio scroll area.
-- CLI streaming keeps the input focusable for cancellation and announces completion/errors without announcing every token.
-- The target is WCAG 2.2 AA for keyboard, focus, form-error, and reduced-motion behavior.
-
-## Game Physics Changes
-
-Changes to vehicle dimensions, forces, suspension, collectibles, fixed stepping, or render transforms must update canonical values in `lib/game/config.ts` and pass `npm run test:physics`. Do not duplicate tuning values in renderers or tests.
+Runs type checking, linting, tests, and a production build.
 
 ## Deploy
 
@@ -202,6 +48,6 @@ Changes to vehicle dimensions, forces, suspension, collectibles, fixed stepping,
 npx vercel
 ```
 
-Add the server-only Gemini environment variables to the deployment project before enabling public AI fallback. Do not expose or commit `.env`.
+Add your Gemini environment variables to the deployment project before enabling the AI chatbot in production.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/andreikylehidalgo/portfolio)
