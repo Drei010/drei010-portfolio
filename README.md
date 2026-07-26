@@ -42,12 +42,6 @@ npm run check
 
 Runs type checking, linting, tests, and a production build.
 
-## Deploy
-
-```bash
-npx vercel
-```
-
 Add your Gemini environment variables to the deployment project before enabling the AI chatbot in production.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/andreikylehidalgo/portfolio)
