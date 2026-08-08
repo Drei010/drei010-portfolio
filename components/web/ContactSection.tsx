@@ -13,13 +13,13 @@ export function ContactSection() {
     : { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } };
 
   return (
-    <section id="contact" className="px-4 py-16 sm:py-24">
-      <div className="mx-auto max-w-5xl">
-        <AnimatedHeading className="mb-8 text-xl font-bold sm:text-2xl">
+    <section id="contact" className="px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+      <div className="mx-auto max-w-7xl">
+        <AnimatedHeading className="mb-8 max-w-3xl text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
           Contact
         </AnimatedHeading>
         <motion.p
-          className="-mt-4 mb-8 text-foreground/80"
+          className="-mt-2 mb-12 max-w-xl text-lg leading-relaxed text-foreground/75"
           variants={subtitleVariants}
           initial="hidden"
           whileInView="visible"
@@ -33,7 +33,7 @@ export function ContactSection() {
         >
           Interested in working together? Feel free to reach out.
         </motion.p>
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-12 border-t border-border pt-10 md:grid-cols-[1.1fr_0.9fr] md:gap-20">
           <ContactForm />
           <ContactLinks />
         </div>

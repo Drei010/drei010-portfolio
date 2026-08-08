@@ -93,7 +93,7 @@ export function ContactForm() {
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "contact-email-error" : undefined}
           placeholder="you@example.com"
-          className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none"
+          className="w-full border-b border-border bg-transparent px-0 py-3 text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none"
         />
         {errors.email && (
           <p id="contact-email-error" role="alert" className="mt-1 text-sm text-primary-dim">
@@ -118,7 +118,7 @@ export function ContactForm() {
           aria-invalid={Boolean(errors.subject)}
           aria-describedby={errors.subject ? "contact-subject-error" : undefined}
           placeholder="What's this about?"
-          className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none"
+          className="w-full border-b border-border bg-transparent px-0 py-3 text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none"
         />
         {errors.subject && (
           <p id="contact-subject-error" role="alert" className="mt-1 text-sm text-primary-dim">
@@ -143,7 +143,7 @@ export function ContactForm() {
           aria-describedby={errors.message ? "contact-message-error" : undefined}
           placeholder="Your message..."
           rows={5}
-          className="w-full resize-none rounded-lg border border-border bg-surface px-4 py-2 text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none"
+          className="w-full resize-none border-b border-border bg-transparent px-0 py-3 text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none"
         />
         {errors.message && (
           <p id="contact-message-error" role="alert" className="mt-1 text-sm text-primary-dim">
@@ -154,7 +154,7 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="rounded-lg bg-primary px-6 py-2 font-medium text-background transition-colors hover:bg-primary-dim"
+        className="mt-3 border-b-2 border-primary pb-2 font-semibold uppercase tracking-[0.14em] text-foreground transition-colors hover:text-primary"
       >
         Send Message
       </button>

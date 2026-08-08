@@ -19,12 +19,12 @@ export function ProjectsSection({
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   return (
-    <section id="projects" className="px-4 py-16 sm:py-24">
-      <div className="mx-auto max-w-5xl">
-        <AnimatedHeading className="mb-8 text-xl font-bold sm:text-2xl">
+    <section id="projects" className="border-y border-border/70 bg-surface/45 px-5 py-24 sm:px-8 lg:px-12">
+      <div className="mx-auto max-w-7xl">
+        <AnimatedHeading className="mb-10 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
           Projects
         </AnimatedHeading>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {projectsData.map((project, index) => (
             <ProjectCard
               key={project.id}

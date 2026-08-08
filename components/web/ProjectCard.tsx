@@ -29,7 +29,7 @@ export function ProjectCard({
   return (
     <motion.article
       ref={cardRef}
-      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border bg-background shadow-sm transition-[border-color,box-shadow] duration-300 dark:shadow-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none ${
+      className={`group relative flex cursor-pointer flex-col overflow-hidden border bg-background shadow-sm transition-[border-color,box-shadow] duration-300 dark:shadow-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none ${
         highlighted
           ? "border-primary/70 shadow-[0_0_24px_rgba(249,115,22,0.2)]"
           : "border-border hover:border-primary/70 hover:shadow-md hover:shadow-primary/10 dark:hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]"
@@ -59,7 +59,7 @@ export function ProjectCard({
       {/* Hover gradient overlay */}
       <div className="pointer-events-none absolute inset-0 rounded-xl bg-[radial-gradient(ellipse_at_center,_var(--color-primary)_0%,_transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-[0.04]" />
 
-      <div className="relative aspect-video w-full bg-surface-alt">
+      <div className="relative aspect-[4/3] w-full bg-surface-alt">
         {project.thumbnail ? (
           <Image
             src={project.thumbnail}
@@ -89,8 +89,8 @@ export function ProjectCard({
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="mb-1 text-lg font-semibold transition-colors group-hover:text-primary">
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="mb-2 text-lg font-semibold tracking-[-0.03em] transition-colors group-hover:text-primary">
           {project.title}
         </h3>
         <p className="mb-4 flex-1 text-sm leading-relaxed text-muted">

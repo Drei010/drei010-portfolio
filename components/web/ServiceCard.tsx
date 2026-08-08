@@ -22,7 +22,7 @@ export function ServiceCard({ service, index }: ServiceCardProps) {
 
   return (
     <motion.div
-      className="group relative flex flex-col rounded-xl border border-border bg-background p-4 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-primary/70 hover:shadow-md hover:shadow-primary/10 dark:shadow-none dark:hover:shadow-[0_0_20px_rgba(249,115,22,0.15)] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+      className="group relative flex min-h-72 flex-col bg-background p-6 transition-colors duration-300 hover:bg-surface-alt/70 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none sm:p-8"
       variants={entranceVariants}
       initial="hidden"
       whileInView="visible"
@@ -42,7 +42,7 @@ export function ServiceCard({ service, index }: ServiceCardProps) {
 
       {/* Icon */}
       <motion.div
-        className="relative mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-surface-alt text-primary transition-colors duration-300 group-hover:bg-primary/20"
+        className="relative mb-8 flex h-10 w-10 items-center justify-center border border-primary/50 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-background"
         variants={{
           rest: { scale: 1, rotate: 0 },
           hover: { scale: 1.1, rotate: 3 },
@@ -55,7 +55,7 @@ export function ServiceCard({ service, index }: ServiceCardProps) {
       </motion.div>
 
       {/* Title */}
-      <h3 className="mb-2 text-base font-semibold transition-colors duration-300 group-hover:text-primary">
+      <h3 className="mb-3 text-xl font-semibold tracking-[-0.03em] transition-colors duration-300 group-hover:text-primary">
         {service.title}
       </h3>
 

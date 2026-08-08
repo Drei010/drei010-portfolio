@@ -28,12 +28,12 @@ export function SkillCloud({ activeSkill, onSkillClick }: SkillCloudProps) {
   };
 
   return (
-    <section id="skills" className="px-4 py-16 sm:py-24">
-      <div className="mx-auto max-w-5xl">
-        <AnimatedHeading className="mb-8 text-xl font-bold sm:text-2xl">
+    <section id="skills" className="px-5 py-24 sm:px-8 lg:px-12">
+      <div className="mx-auto max-w-7xl">
+        <AnimatedHeading className="mb-10 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
           Skills
         </AnimatedHeading>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {skillsData.map((category, categoryIndex) => (
             <SkillCategoryCluster
               key={category.name}
@@ -79,7 +79,7 @@ function SkillCategoryCluster({
   return (
     <motion.div
       ref={clusterRef}
-      className="group/cluster relative rounded-xl border border-border bg-background p-4 shadow-sm transition-[border-color,background-color,box-shadow] duration-300 hover:border-primary/40 hover:bg-surface-alt/50 hover:shadow-md hover:shadow-primary/10 dark:shadow-none dark:hover:shadow-[0_0_16px_rgba(249,115,22,0.08)]"
+      className="group/cluster relative border-t border-primary/60 bg-transparent py-5 transition-colors duration-300 hover:bg-surface-alt/40"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}

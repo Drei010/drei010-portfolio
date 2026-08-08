@@ -17,13 +17,13 @@ export function AboutSection() {
     <section
       id="about"
       tabIndex={-1}
-      className="flex min-h-[calc(100vh-3.5rem)] focus:outline-none items-center px-4 py-16 sm:py-24 lg:px-8 lg:py-0"
+      className="flex min-h-[calc(100vh-4rem)] items-center px-5 py-20 focus:outline-none sm:px-8 lg:px-12 lg:py-24"
     >
-      <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-8 lg:max-w-7xl lg:grid-cols-[2fr_1fr_1fr] lg:items-stretch lg:gap-10">
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-end gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] lg:gap-24">
         {/* Left column — About data */}
         <div className="self-center">
           <motion.h1
-            className="text-3xl font-bold sm:text-4xl lg:text-5xl"
+            className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-6xl lg:text-8xl"
             variants={textVariants}
             initial="hidden"
             whileInView="visible"
@@ -39,7 +39,7 @@ export function AboutSection() {
           </motion.h1>
 
           <motion.p
-            className="mt-3 text-lg font-medium text-primary lg:text-xl"
+            className="mt-6 text-base font-medium uppercase tracking-[0.18em] text-primary lg:text-lg"
             variants={textVariants}
             initial="hidden"
             whileInView="visible"
@@ -55,7 +55,7 @@ export function AboutSection() {
           </motion.p>
 
           <motion.p
-            className="mt-4 text-base leading-relaxed text-foreground/80 lg:text-lg"
+            className="mt-6 max-w-2xl text-lg leading-relaxed text-foreground/75 lg:text-xl"
             variants={textVariants}
             initial="hidden"
             whileInView="visible"
@@ -72,7 +72,7 @@ export function AboutSection() {
 
           <motion.a
             href="#contact"
-            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-background transition-colors duration-200 hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none lg:text-base"
+            className="mt-10 inline-flex items-center gap-3 border-b-2 border-primary pb-2 text-sm font-semibold uppercase tracking-[0.14em] text-foreground transition-colors hover:text-primary lg:text-base"
             variants={textVariants}
             initial="hidden"
             whileInView="visible"
@@ -89,8 +89,10 @@ export function AboutSection() {
         </div>
 
         {/* Feature Cards as separate grid columns */}
-        <CliFeatureCard />
-        <GameFeatureCard />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
+          <CliFeatureCard />
+          <GameFeatureCard />
+        </div>
       </div>
     </section>
   );
