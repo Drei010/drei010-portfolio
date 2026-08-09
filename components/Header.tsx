@@ -68,7 +68,7 @@ export function Header() {
             alt="Andrei Kyle Logo"
             width={160}
             height={32}
-            className="h-11 w-auto"
+            className={`h-11 w-auto ${logoSrc === "/2.svg" ? "mix-blend-multiply" : ""}`}
             priority
             suppressHydrationWarning
           />
