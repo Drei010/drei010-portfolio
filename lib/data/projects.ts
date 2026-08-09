@@ -13,13 +13,13 @@ export const projectsData: Project[] = [
   },
   {
     id: "project-2",
-    title: "BiteScout AI Chat",
+    title: "BiteScout",
     description:
-      "Hungry and looking for the perfect meal? BiteScout AI Chat helps you discover delicious options based on location.",
-    thumbnail: "/projects/ai-chat.png",
-    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "OpenAI", "Groq", "Foursquare APIs", "AI Integration", "Vercel"],
-    liveUrl: "https://example.com",
-    repoUrl: "https://github.com/andreikylehidalgo/ai-chat",
+      "A craving-led restaurant finder that turns natural-language food searches into a shortlist of nearby spots worth trying.",
+    thumbnail: "/projects/bitescout.jpg",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "OpenAI", "Groq", "Foursquare APIs", "Vercel"],
+    liveUrl: "https://bite-scout-seven.vercel.app",
+    repoUrl: "https://github.com/Drei010/BiteScout",
   },
   {
     id: "project-3",
