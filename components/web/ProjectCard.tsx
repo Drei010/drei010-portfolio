@@ -29,7 +29,7 @@ export function ProjectCard({
   return (
     <motion.article
       ref={cardRef}
-      className={`group relative flex cursor-pointer flex-col overflow-hidden border bg-background shadow-sm transition-[border-color,box-shadow] duration-300 dark:shadow-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none ${
+      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border bg-background shadow-sm transition-[border-color,box-shadow] duration-300 dark:shadow-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none ${
         highlighted
           ? "border-primary/70 shadow-[0_0_24px_rgba(249,115,22,0.2)]"
           : "border-border hover:border-primary/70 hover:shadow-md hover:shadow-primary/10 dark:hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]"
@@ -59,14 +59,14 @@ export function ProjectCard({
       {/* Hover gradient overlay */}
       <div className="pointer-events-none absolute inset-0 rounded-xl bg-[radial-gradient(ellipse_at_center,_var(--color-primary)_0%,_transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-[0.04]" />
 
-      <div className="relative aspect-[4/3] w-full bg-surface-alt">
+      <div className="relative aspect-[16/10] w-full bg-surface-alt p-2 sm:p-3">
         {project.thumbnail ? (
           <Image
             src={project.thumbnail}
             alt={`${project.title} thumbnail`}
             fill
             sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
-            className="object-cover"
+            className="object-contain"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted">

@@ -21,10 +21,15 @@ export function ProjectsSection({
   return (
     <section id="projects" className="border-y border-border/70 bg-surface/45 px-5 py-24 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-7xl">
-        <AnimatedHeading className="mb-10 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
-          Projects
-        </AnimatedHeading>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-12 flex items-end justify-between gap-6 border-b border-border/70 pb-6">
+          <AnimatedHeading className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+            Selected projects
+          </AnimatedHeading>
+          <span className="hidden text-sm text-muted sm:block">
+            {projectsData.length} builds
+          </span>
+        </div>
+        <div className="grid gap-8 lg:grid-cols-2">
           {projectsData.map((project, index) => (
             <ProjectCard
               key={project.id}
