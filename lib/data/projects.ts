@@ -23,13 +23,12 @@ export const projectsData: Project[] = [
   },
   {
     id: "project-3",
-    title: "RehabBuddy, A AI Stroke Rehabilitation Companion",
+    title: "Lutoko",
     description:
-      "A stroke rehabilitation companion that leverages AI to provide personalized exercises, progress tracking, and motivational support for patients.",
-    thumbnail: "/projects/rehabbuddy.png",
-    techStack: ["Next.js", "TypeScript", "Supabase", "OpenAI", "Groq", "Vercel"],
-    liveUrl: "https://example.com",
-    repoUrl: "https://github.com/andreikylehidalgo/rehabbuddy",
+      "A personal cooking archive for collecting and revisiting favorite recipes.",
+    thumbnail: "/projects/lutoko-home.png",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
+    liveUrl: "https://luto-ko.vercel.app",
   },
   {
     id: "project-4",

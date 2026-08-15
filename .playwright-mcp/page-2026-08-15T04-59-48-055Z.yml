@@ -1,0 +1,203 @@
+- generic [active] [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - generic [ref=f2e3]:
+      - button "Go to About section" [ref=f2e4]:
+        - img "Andrei Kyle Logo" [ref=f2e5]
+      - generic [ref=f2e6]:
+        - switch "Switch to dark mode" [ref=f2e7]
+        - button "Switch to CLI view" [ref=f2e25]:
+          - generic [ref=f2e28]: CLI
+        - button "Play portfolio game" [ref=f2e30]:
+          - generic [ref=f2e33]: Play
+  - main [ref=f2e34]:
+    - generic [ref=f2e36]:
+      - generic [ref=f2e38]:
+        - generic [ref=f2e39]:
+          - heading "Andrei Kyle Hidalgo" [level=1] [ref=f2e40]
+          - paragraph [ref=f2e41]: Full-Stack Developer
+          - paragraph [ref=f2e42]: Building enterprise systems and AI-powered web applications. Have an idea? Let’s connect and create something great.
+          - link "Get in Touch" [ref=f2e43] [cursor=pointer]:
+            - /url: "#contact"
+        - generic [ref=f2e44]:
+          - generic [ref=f2e45]:
+            - heading "CLI Mode" [level=3] [ref=f2e49]
+            - paragraph [ref=f2e50]: Your terminal is ready. Type commands, explore my work, and discover who I am one command at a time.
+            - list [ref=f2e51]:
+              - listitem [ref=f2e52]: AI-powered responses
+              - listitem [ref=f2e54]: Tab completion
+              - listitem [ref=f2e56]: Command history
+            - button "Switch to CLI view" [ref=f2e58]: Try CLI
+          - generic [ref=f2e61]:
+            - heading "Game Mode" [level=3] [ref=f2e65]
+            - paragraph [ref=f2e66]: Explore my portfolio by playing a hill climb racing game. Drive, collect items, and discover my work in a fun way.
+            - list [ref=f2e67]:
+              - listitem [ref=f2e68]: Physics-based driving
+              - listitem [ref=f2e70]: Collectible portfolio items
+              - listitem [ref=f2e72]: Progressive difficulty
+            - button "Switch to game view" [ref=f2e74]: Play Game
+      - generic [ref=f2e78]:
+        - heading "Services" [level=2] [ref=f2e79]
+        - generic [ref=f2e80]:
+          - generic [ref=f2e81]:
+            - heading "Web Development" [level=3] [ref=f2e86]
+            - paragraph [ref=f2e87]: Building fast, responsive, and accessible web applications with modern frameworks and best practices.
+            - list [ref=f2e88]:
+              - listitem [ref=f2e89]: Custom web apps with Next.js & React
+              - listitem [ref=f2e91]: Responsive, mobile-first design
+              - listitem [ref=f2e93]: Performance optimization & SEO
+              - listitem [ref=f2e95]: API integration & full-stack solutions
+          - generic [ref=f2e97]:
+            - heading "AI Integration" [level=3] [ref=f2e103]
+            - paragraph [ref=f2e104]: Integrating AI capabilities into products — from conversational interfaces to intelligent automation.
+            - list [ref=f2e105]:
+              - listitem [ref=f2e106]: LLM-powered features & chatbots
+              - listitem [ref=f2e108]: RAG pipelines & knowledge bases
+              - listitem [ref=f2e110]: AI API integration (OpenAI, etc.)
+              - listitem [ref=f2e112]: Intelligent workflow automation
+          - generic [ref=f2e114]:
+            - heading "UI/UX Design" [level=3] [ref=f2e122]
+            - paragraph [ref=f2e123]: Designing intuitive, visually polished interfaces that prioritize usability and delight users.
+            - list [ref=f2e124]:
+              - listitem [ref=f2e125]: User-centered interface design
+              - listitem [ref=f2e127]: Design systems & component libraries
+              - listitem [ref=f2e129]: Prototyping & interaction design
+              - listitem [ref=f2e131]: Accessibility-first approach
+      - generic [ref=f2e133]:
+        - generic [ref=f2e135]:
+          - heading "Skills" [level=2] [ref=f2e136]
+          - generic [ref=f2e137]:
+            - generic [ref=f2e138]:
+              - heading "Frontend" [level=3] [ref=f2e139]
+              - generic [ref=f2e140]:
+                - button "SAP UI5" [ref=f2e141]
+                - button "React" [ref=f2e142]
+                - button "Next.js" [ref=f2e143]
+                - button "TypeScript" [ref=f2e144]
+                - button "Tailwind CSS" [ref=f2e145]
+                - button "HTML/CSS" [ref=f2e146]
+            - generic [ref=f2e147]:
+              - heading "Backend" [level=3] [ref=f2e148]
+              - generic [ref=f2e149]:
+                - button "Node.js" [ref=f2e150]
+                - button "Python" [ref=f2e151]
+                - button "REST APIs" [ref=f2e152]
+                - button "Supabase" [ref=f2e153]
+            - generic [ref=f2e154]:
+              - heading "DevOps & Cloud" [level=3] [ref=f2e155]
+              - generic [ref=f2e156]:
+                - button "AWS" [ref=f2e157]
+                - button "SAP BTP" [ref=f2e158]
+                - button "GitHub CI/CD" [ref=f2e159]
+                - button "Vercel" [ref=f2e160]
+                - button "Render" [ref=f2e161]
+                - button "Git" [ref=f2e162]
+            - generic [ref=f2e163]:
+              - heading "AI" [level=3] [ref=f2e164]
+              - generic [ref=f2e165]:
+                - button "OpenAI APIs" [ref=f2e166]
+                - button "RAG" [ref=f2e167]
+                - button "LangChain" [ref=f2e168]
+                - button "AI Integration" [ref=f2e169]
+                - button "System Design" [ref=f2e170]
+        - generic [ref=f2e172]:
+          - generic [ref=f2e173]:
+            - heading "Selected projects" [level=2] [ref=f2e174]
+            - generic [ref=f2e175]: 4 builds
+          - generic [ref=f2e176]:
+            - article [ref=f2e177] [cursor=pointer]:
+              - button "View details for RAG Backend" [ref=f2e178]
+              - img "RAG Backend thumbnail" [ref=f2e180]
+              - generic [ref=f2e181]:
+                - heading "RAG Backend" [level=3] [ref=f2e182]
+                - paragraph [ref=f2e183]: A Retrieval-Augmented Generation (RAG) backend service that integrates with OpenAI APIs to provide context-aware responses for various applications.
+                - generic [ref=f2e184]:
+                  - generic [ref=f2e185]: FastAPI
+                  - generic [ref=f2e186]: Python
+                  - generic [ref=f2e187]: ChromaDB
+                  - generic [ref=f2e188]: AWS S3 Bucket
+                  - generic [ref=f2e189]: OpenAI
+                  - generic [ref=f2e190]: LangChain
+                  - generic [ref=f2e191]: Render
+                - generic [ref=f2e192]:
+                  - link "View live demo of RAG Backend" [ref=f2e193]:
+                    - /url: https://example.com
+                    - text: Live Demo ↗
+                  - link "View source code of RAG Backend" [ref=f2e194]:
+                    - /url: https://github.com/andreikylehidalgo/rag-backend
+                    - text: Source ↗
+            - article [ref=f2e195] [cursor=pointer]:
+              - button "View details for BiteScout" [ref=f2e196]
+              - img "BiteScout thumbnail" [ref=f2e198]
+              - generic [ref=f2e199]:
+                - heading "BiteScout" [level=3] [ref=f2e200]
+                - paragraph [ref=f2e201]: A craving-led restaurant finder that turns natural-language food searches into a shortlist of nearby spots worth trying.
+                - generic [ref=f2e202]:
+                  - generic [ref=f2e203]: Next.js
+                  - generic [ref=f2e204]: TypeScript
+                  - generic [ref=f2e205]: Tailwind CSS
+                  - generic [ref=f2e206]: OpenAI
+                  - generic [ref=f2e207]: Groq
+                  - generic [ref=f2e208]: Foursquare APIs
+                  - generic [ref=f2e209]: Vercel
+                - generic [ref=f2e210]:
+                  - link "View live demo of BiteScout" [ref=f2e211]:
+                    - /url: https://bite-scout-seven.vercel.app
+                    - text: Live Demo ↗
+                  - link "View source code of BiteScout" [ref=f2e212]:
+                    - /url: https://github.com/Drei010/BiteScout
+                    - text: Source ↗
+            - article [ref=f2e213] [cursor=pointer]:
+              - button "View details for Lutoko" [ref=f2e214]
+              - generic [ref=f2e221]:
+                - heading "Lutoko" [level=3] [ref=f2e222]
+                - paragraph [ref=f2e223]: A personal cooking archive for collecting and revisiting favorite recipes.
+                - generic [ref=f2e224]:
+                  - generic [ref=f2e225]: Next.js
+                  - generic [ref=f2e226]: TypeScript
+                  - generic [ref=f2e227]: Tailwind CSS
+                  - generic [ref=f2e228]: Vercel
+                - link "View live demo of Lutoko" [ref=f2e230]:
+                  - /url: https://luto-ko.vercel.app
+                  - text: Live Demo ↗
+            - article [ref=f2e231] [cursor=pointer]:
+              - button "View details for Developer Portfolio" [ref=f2e232]
+              - img "Developer Portfolio thumbnail" [ref=f2e234]
+              - generic [ref=f2e235]:
+                - heading "Developer Portfolio" [level=3] [ref=f2e236]
+                - paragraph [ref=f2e237]: This portfolio site — a dual-view experience with a minimalist web interface and an interactive CLI terminal.
+                - generic [ref=f2e238]:
+                  - generic [ref=f2e239]: Next.js
+                  - generic [ref=f2e240]: TypeScript
+                  - generic [ref=f2e241]: Tailwind CSS
+                  - generic [ref=f2e242]: Vercel
+                - link "View source code of Developer Portfolio" [ref=f2e244]:
+                  - /url: https://github.com/Drei010/drei010-portfolio
+                  - text: Source ↗
+      - generic [ref=f2e246]:
+        - heading "Contact" [level=2] [ref=f2e247]
+        - paragraph [ref=f2e248]: Interested in working together? Feel free to reach out.
+        - generic [ref=f2e249]:
+          - generic [ref=f2e250]:
+            - generic [ref=f2e251]:
+              - generic [ref=f2e252]: Your Email
+              - textbox "Your Email" [ref=f2e253]:
+                - /placeholder: you@example.com
+            - generic [ref=f2e254]:
+              - generic [ref=f2e255]: Subject
+              - textbox "Subject" [ref=f2e256]:
+                - /placeholder: What's this about?
+            - generic [ref=f2e257]:
+              - generic [ref=f2e258]: Message
+              - textbox "Message" [ref=f2e259]:
+                - /placeholder: Your message...
+            - button "Send Message" [ref=f2e260]
+          - generic [ref=f2e261]:
+            - heading "Get in touch" [level=3] [ref=f2e262]
+            - link "Send email to andreihidalgo16@gmail.com" [ref=f2e263] [cursor=pointer]:
+              - /url: mailto:andreihidalgo16@gmail.com
+              - generic [ref=f2e267]: andreihidalgo16@gmail.com
+            - link "Visit LinkedIn profile" [ref=f2e268] [cursor=pointer]:
+              - /url: https://linkedin.com/in/andrei-kyle-hidalgo
+              - generic [ref=f2e273]: andreikylehidalgo
+              - generic [ref=f2e274]: ↗
+  - button "Open Next.js Dev Tools" [ref=f2e280] [cursor=pointer]
