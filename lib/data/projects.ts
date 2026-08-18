@@ -6,10 +6,9 @@ export const projectsData: Project[] = [
     title: "RAG Backend",
     description:
       "A Retrieval-Augmented Generation (RAG) backend service that integrates with OpenAI APIs to provide context-aware responses for various applications.",
-    thumbnail: "/projects/rag-backend.png",
+    thumbnail: "/projects/rag-backend.svg",
     techStack: ["FastAPI", "Python", "ChromaDB", "AWS S3 Bucket", "OpenAI", "LangChain", "Render"],
-    liveUrl: "https://example.com",
-    repoUrl: "https://github.com/andreikylehidalgo/rag-backend",
+    repoUrl: "https://github.com/Drei010/python-rag-learning",
   },
   {
     id: "project-2",
