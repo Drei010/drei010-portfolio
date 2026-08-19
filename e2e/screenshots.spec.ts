@@ -10,14 +10,14 @@ async function goToHome(page: Page) {
 test.describe("Portfolio views screenshots", () => {
   test("captures web view", async ({ page }) => {
     await goToHome(page);
-    await page.screenshot({ path: "e2e/screenshots/web-view.png", fullPage: true });
+    await page.screenshot({ path: "e2e/screenshots/views/web-view.png", fullPage: true });
   });
 
   test("captures CLI view", async ({ page }) => {
     await goToHome(page);
     await page.getByRole("main").getByRole("button", { name: "Switch to CLI view" }).click();
     await page.getByLabel("Terminal command input").waitFor({ state: "visible" });
-    await page.screenshot({ path: "e2e/screenshots/cli-view.png", fullPage: true });
+    await page.screenshot({ path: "e2e/screenshots/views/cli-view.png", fullPage: true });
   });
 
   test("captures game view", async ({ page }) => {
@@ -25,6 +25,6 @@ test.describe("Portfolio views screenshots", () => {
     await page.getByRole("main").getByRole("button", { name: "Switch to game view" }).click();
     await expect(page.getByRole("main").getByRole("button", { name: "Switch to game view" })).toHaveCount(0);
     await page.locator("canvas").first().waitFor({ state: "visible" });
-    await page.screenshot({ path: "e2e/screenshots/game-view.png", fullPage: true });
+    await page.screenshot({ path: "e2e/screenshots/views/game-view.png", fullPage: true });
   });
 });
