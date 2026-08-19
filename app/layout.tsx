@@ -44,7 +44,26 @@ export const metadata: Metadata = {
   },
 };
 
-const themeScript = `(function(){try{document.documentElement.classList.add("no-transition");var k=${JSON.stringify(THEME_STORAGE_KEY)};var tk=${JSON.stringify(THEME_TIMESTAMP_KEY)};var t=localStorage.getItem(k);var ts=localStorage.getItem(tk);if((t==="light"||t==="dark")&&ts&&Number.isFinite(Number(ts))&&Date.now()-Number(ts)>=0&&Date.now()-Number(ts)<${THEME_EXPIRY_MS}){if(t==="dark")document.documentElement.classList.add("dark");return}localStorage.removeItem(k);localStorage.removeItem(tk);var h=new Date().getHours();if(h<6||h>=18)document.documentElement.classList.add("dark")}catch(e){}})()`;
+const UNSAFE_SCRIPT_CHAR_MAP: Record<string, string> = {
+  "<": "\\u003C",
+  ">": "\\u003E",
+  "/": "\\u002F",
+  "\\": "\\\\",
+  "\b": "\\b",
+  "\f": "\\f",
+  "\n": "\\n",
+  "\r": "\\r",
+  "\t": "\\t",
+  "\0": "\\0",
+  "\u2028": "\\u2028",
+  "\u2029": "\\u2029",
+};
+
+function escapeUnsafeScriptChars(str: string): string {
+  return str.replace(/[<>/\\\b\f\n\r\t\0\u2028\u2029]/g, (ch) => UNSAFE_SCRIPT_CHAR_MAP[ch] ?? ch);
+}
+
+const themeScript = `(function(){try{document.documentElement.classList.add("no-transition");var k=${escapeUnsafeScriptChars(JSON.stringify(THEME_STORAGE_KEY))};var tk=${escapeUnsafeScriptChars(JSON.stringify(THEME_TIMESTAMP_KEY))};var t=localStorage.getItem(k);var ts=localStorage.getItem(tk);if((t==="light"||t==="dark")&&ts&&Number.isFinite(Number(ts))&&Date.now()-Number(ts)>=0&&Date.now()-Number(ts)<${THEME_EXPIRY_MS}){if(t==="dark")document.documentElement.classList.add("dark");return}localStorage.removeItem(k);localStorage.removeItem(tk);var h=new Date().getHours();if(h<6||h>=18)document.documentElement.classList.add("dark")}catch(e){}})()`;
 
 export default function RootLayout({
   children,
