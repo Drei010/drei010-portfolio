@@ -19,6 +19,7 @@
     "@langchain/core": "1.2.3",
     "@langchain/google": "0.2.1",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "matter-js": "^0.20.0",
     "motion": "^12.42.2",
     "next": "^16.2.10",
