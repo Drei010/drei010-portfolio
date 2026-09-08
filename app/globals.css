@@ -5,7 +5,7 @@
 @theme {
   --color-background: #f7f4ef;
   --color-foreground: #241914;
-  --color-primary: #f97316;
+  --color-primary: #c2410c;
   --color-primary-dim: #c2410c;
   --color-surface: #fffdf9;
   --color-surface-alt: #eee8df;
@@ -45,6 +45,7 @@
   --color-surface-alt: #281b14;
   --color-border: #493126;
   --color-muted: #bca99e;
+  --color-primary: #f97316;
 }
 
 @keyframes fade-in {

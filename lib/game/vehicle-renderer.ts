@@ -15,7 +15,7 @@ let imageReady = false;
 function loadCarImage(): void {
   if (carImage) return;
   carImage = new Image();
-  carImage.src = "/car.png";
+  carImage.src = "/car.webp";
   carImage.onload = () => {
     // Process image to remove white background
     processedCanvas = document.createElement("canvas");

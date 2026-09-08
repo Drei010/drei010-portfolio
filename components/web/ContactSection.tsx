@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ContactForm } from "@/components/web/ContactForm";
 import { ContactLinks } from "@/components/web/ContactLinks";
 import { AnimatedHeading } from "@/components/web/AnimatedHeading";
+import Link from "next/link";
 
 export function ContactSection() {
   const shouldReduceMotion = useReducedMotion();
@@ -37,6 +38,10 @@ export function ContactSection() {
           <ContactForm />
           <ContactLinks />
         </div>
+        <nav aria-label="Legal" className="mt-16 flex gap-5 border-t border-border pt-6 text-sm text-muted">
+          <Link href="/privacy" className="hover:text-foreground hover:underline">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-foreground hover:underline">Terms &amp; Conditions</Link>
+        </nav>
       </div>
     </section>
   );

@@ -15,7 +15,7 @@ export function ViewToggle() {
     >
       <button
         onClick={toggleView}
-        className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-mono transition-colors duration-200 hover:border-primary hover:text-primary"
+        className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-mono transition-colors duration-200 hover:border-primary hover:text-primary"
         aria-label={`Switch to ${view === "web" ? "CLI" : "Web"} view`}
         aria-hidden={isHidden}
         tabIndex={isHidden ? -1 : 0}

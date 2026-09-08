@@ -19,7 +19,7 @@ export function ThemeToggle() {
       aria-checked={isDark}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
       onClick={toggleTheme}
-      className="relative flex h-8 w-14 items-center rounded-full border border-border bg-surface-alt p-0.5 transition-colors duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+      className="relative flex h-11 w-14 items-center rounded-full border border-border bg-surface-alt p-0.5 transition-colors duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
     >
       {/* Sliding indicator */}
       <span

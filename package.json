@@ -13,6 +13,7 @@
     "test:chat": "vitest run",
     "test": "npm run test:repo && npm run test:physics && npm run test:chat",
     "test:e2e": "playwright test",
+    "check:links": "node scripts/check-links.mjs",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {

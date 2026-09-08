@@ -12,6 +12,7 @@ import {
 } from "@/lib/theme-config";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { getSiteUrl } from "@/lib/site-url";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,6 +25,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: getSiteUrl(),
   title: "Andrei's Portfolio",
   description:
     "Full-Stack Developer portfolio featuring an interactive CLI terminal and a modern web interface. Built with Next.js, TypeScript, and Tailwind CSS.",
@@ -41,7 +43,16 @@ export const metadata: Metadata = {
     description:
       "Interactive developer portfolio with dual web and CLI views.",
     type: "website",
+    url: "/",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Andrei Kyle Hidalgo — Full-Stack Developer" }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Andrei Kyle Hidalgo | Full-Stack Developer",
+    description: "Interactive developer portfolio with dual web and CLI views.",
+    images: ["/opengraph-image"],
+  },
+  alternates: { canonical: "/" },
 };
 
 const UNSAFE_SCRIPT_CHAR_MAP: Record<string, string> = {
