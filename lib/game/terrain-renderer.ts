@@ -7,10 +7,12 @@ const BASE_HEIGHT = 550;
 // using screen-space canvasHeight here would invert the fill on
 // short canvases where canvasHeight is smaller than the terrain surface Y.
 const FILL_BOTTOM_Y = BASE_HEIGHT + 500;
+const gradients = new WeakMap<CanvasRenderingContext2D, CanvasGradient>();
 
 export function renderTerrain(
   ctx: CanvasRenderingContext2D,
-  chunks: TerrainChunk[]
+  chunks: TerrainChunk[],
+  viewportBottom = FILL_BOTTOM_Y
 ): void {
   if (chunks.length === 0) return;
 
@@ -43,16 +45,19 @@ export function renderTerrain(
   ctx.lineTo(last.x, last.y);
 
   // Close path at bottom
-  ctx.lineTo(last.x, FILL_BOTTOM_Y);
-  ctx.lineTo(allVertices[0].x, FILL_BOTTOM_Y);
+  const bottom = Math.max(FILL_BOTTOM_Y, viewportBottom);
+  ctx.lineTo(last.x, bottom);
+  ctx.lineTo(allVertices[0].x, bottom);
   ctx.closePath();
 
   // Gradient fill
-  const gradient = ctx.createLinearGradient(0, BASE_HEIGHT - 100, 0, BASE_HEIGHT + 200);
-  gradient.addColorStop(0, "#22c55e");
-  gradient.addColorStop(0.4, "#16a34a");
-  gradient.addColorStop(0.7, "#15803d");
-  gradient.addColorStop(1, "#14532d");
+  let gradient = gradients.get(ctx);
+  if (!gradient) {
+    gradient = ctx.createLinearGradient(0, BASE_HEIGHT - 100, 0, BASE_HEIGHT + 200);
+    gradient.addColorStop(0, "#3c7857");
+    gradient.addColorStop(1, "#183e35");
+    gradients.set(ctx, gradient);
+  }
   ctx.fillStyle = gradient;
   ctx.fill();
 
@@ -67,7 +72,7 @@ export function renderTerrain(
     ctx.quadraticCurveTo(current.x, current.y, midX, midY);
   }
   ctx.lineTo(last.x, last.y);
-  ctx.strokeStyle = "#4ade80";
+  ctx.strokeStyle = "#b0ce82";
   ctx.lineWidth = 3;
   ctx.stroke();
 

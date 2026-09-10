@@ -9,7 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:repo": "node scripts/test-repository.mjs",
-    "test:physics": "node scripts/test-vehicle-physics.mjs",
+    "test:physics": "node scripts/test-vehicle-physics.mjs && node scripts/test-game-journey.mjs",
     "test:chat": "vitest run",
     "test": "npm run test:repo && npm run test:physics && npm run test:chat",
     "test:e2e": "playwright test",

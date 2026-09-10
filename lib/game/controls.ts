@@ -11,6 +11,7 @@ export function setupKeyboardControls(
   setState: (updater: (prev: ControlsState) => ControlsState) => void
 ): () => void {
   function handleKeyDown(e: KeyboardEvent) {
+    if (e.target instanceof HTMLElement && e.target.closest("input, textarea, select, a, button, [contenteditable=true]")) return;
     if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
       e.preventDefault();
       setState((prev) => ({ ...prev, gasPressed: true }));

@@ -10,7 +10,12 @@ import { ContactSection } from "@/components/web/ContactSection";
 import { ConstellationBackground } from "@/components/web/ConstellationBackground";
 import { ScrollProgressBar } from "@/components/web/ScrollProgressBar";
 import { Terminal } from "@/components/cli/Terminal";
-import { GameCanvas } from "@/components/game/GameCanvas";
+import dynamic from "next/dynamic";
+
+const GameCanvas = dynamic(() => import("@/components/game/GameCanvas").then(module => module.GameCanvas), {
+  ssr: false,
+  loading: () => <div className="game-loading" role="status">Preparing your journey…</div>,
+});
 
 const viewTransition = {
   initial: { opacity: 0, scale: 0.98 },

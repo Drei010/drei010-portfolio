@@ -19,6 +19,7 @@ export function GameControls({
     event: PointerEvent<HTMLButtonElement>,
     onStart: () => void
   ) {
+    if (event.button !== 0) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     onStart();
   }
@@ -34,19 +35,23 @@ export function GameControls({
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden justify-between p-4 sm:p-6 [@media(pointer:coarse)]:flex">
+    <div className="game-pedals">
       <button
         onPointerDown={(event) => startControl(event, onBrakeStart)}
         onPointerUp={(event) => endControl(event, onBrakeEnd)}
         onPointerCancel={onBrakeEnd}
         onLostPointerCapture={onBrakeEnd}
         onContextMenu={(event) => event.preventDefault()}
-        className="pointer-events-auto flex h-16 w-16 touch-none select-none items-center justify-center rounded-full border-2 border-white/40 bg-white/20 backdrop-blur-sm transition-all active:scale-95 active:bg-white/40 sm:h-20 sm:w-20"
+        className="game-pedal"
+        onKeyDown={event => { if (event.key === " " || event.key === "Enter") { event.preventDefault(); onBrakeStart(); } }}
+        onKeyUp={event => { if (event.key === " " || event.key === "Enter") onBrakeEnd(); }}
+        onBlur={onBrakeEnd}
         aria-label="Brake"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="15 18 9 12 15 6" />
         </svg>
+        <span>BRAKE</span>
       </button>
 
       <button
@@ -55,12 +60,16 @@ export function GameControls({
         onPointerCancel={onGasEnd}
         onLostPointerCapture={onGasEnd}
         onContextMenu={(event) => event.preventDefault()}
-        className="pointer-events-auto flex h-16 w-16 touch-none select-none items-center justify-center rounded-full border-2 border-white/40 bg-white/20 backdrop-blur-sm transition-all active:scale-95 active:bg-white/40 sm:h-20 sm:w-20"
+        className="game-pedal game-gas"
+        onKeyDown={event => { if (event.key === " " || event.key === "Enter") { event.preventDefault(); onGasStart(); } }}
+        onKeyUp={event => { if (event.key === " " || event.key === "Enter") onGasEnd(); }}
+        onBlur={onGasEnd}
         aria-label="Gas"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="9 18 15 12 9 6" />
         </svg>
+        <span>GAS</span>
       </button>
     </div>
   );

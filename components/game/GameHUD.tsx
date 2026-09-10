@@ -1,44 +1,27 @@
-"use client";
+import { CHAPTERS, portfolioItems } from "@/lib/game/portfolio";
 
 type GameHUDProps = {
   distance: number;
   collected: number;
-  total: number;
   onBack: () => void;
+  onCollection: () => void;
+  collectionOpen: boolean;
 };
 
-export function GameHUD({ distance, collected, total, onBack }: GameHUDProps) {
-  return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between p-3 sm:p-4">
-      <button
-        onClick={onBack}
-        className="pointer-events-auto flex items-center gap-1 rounded-lg border border-white/30 bg-white/20 px-3 py-1.5 font-mono text-xs text-white backdrop-blur-sm transition-colors hover:bg-white/30"
-        aria-label="Back to portfolio"
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-        Back
-      </button>
-
-      <div className="flex gap-2 sm:gap-3">
-        <div className="rounded-lg border border-white/30 bg-white/20 px-3 py-1.5 font-mono text-xs text-white backdrop-blur-sm">
-          {distance}m
-        </div>
-        <div className="rounded-lg border border-white/30 bg-white/20 px-3 py-1.5 font-mono text-xs text-white backdrop-blur-sm">
-          {collected}/{total} ⭐
-        </div>
-      </div>
+export function GameHUD({ distance, collected, onBack, onCollection, collectionOpen }: GameHUDProps) {
+  const chapter = portfolioItems[Math.min(collected, portfolioItems.length - 1)].type;
+  return <div className="game-hud">
+    <button className="game-button game-back" onClick={onBack} aria-label="Back to portfolio">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg>
+      <span>Portfolio</span>
+    </button>
+    <div className="game-progress">
+      <div className="game-progress-label"><span>{collected === portfolioItems.length ? "Journey complete" : `${CHAPTERS.indexOf(chapter) + 1} / 5 · ${chapter}`}</span><span data-testid="game-distance">{distance}m</span></div>
+      <progress value={collected} max={portfolioItems.length} aria-label="Portfolio discovery progress" />
     </div>
-  );
+    <button className="game-button" onClick={onCollection} aria-expanded={collectionOpen} aria-controls="game-collection" aria-label={`Collection, ${collected} of ${portfolioItems.length} discovered`}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M3 5h7l2 3h9v12H3z" /></svg>
+      <span className="game-collection-label">Collection</span><span data-testid="game-count">{collected}/{portfolioItems.length}</span>
+    </button>
+  </div>;
 }

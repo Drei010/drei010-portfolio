@@ -12,10 +12,10 @@ const REFERENCE_HEIGHT = 720;
 const MIN_ZOOM = 0.6;
 const MAX_ZOOM = 1;
 
-export function getCameraZoom(canvasHeight: number): number {
+export function getCameraZoom(canvasHeight: number, canvasWidth = canvasHeight * 2): number {
   if (canvasHeight <= 0) return MAX_ZOOM;
   const raw = canvasHeight / REFERENCE_HEIGHT;
-  return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, raw));
+  return Math.min(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, raw)), Math.max(0.4, canvasWidth / 800));
 }
 
 export function createCameraState(): CameraState {
@@ -43,15 +43,16 @@ export function updateCamera(
     camera.smoothedVelocityX +
     (velocityX - camera.smoothedVelocityX) * 0.05;
 
-  const zoom = getCameraZoom(canvasHeight);
+  const zoom = getCameraZoom(canvasHeight, canvasWidth);
   // Visible world-space area is the canvas size divided by zoom — zooming
   // out (zoom < 1) grows the visible world area beyond the raw canvas size.
   const visibleWidth = canvasWidth / zoom;
   const visibleHeight = canvasHeight / zoom;
 
   const lookahead = Math.min(Math.max(smoothedVelocityX * 8, 0), LOOKAHEAD_X);
-  const targetX = vehicleX + lookahead - visibleWidth * 0.35;
-  const targetY = vehicleY + OFFSET_Y - visibleHeight * 0.65;
+  const targetX = vehicleX + Math.min(lookahead, visibleWidth * 0.1) - visibleWidth * 0.32;
+  const portrait = canvasHeight > canvasWidth;
+  const targetY = vehicleY + OFFSET_Y - visibleHeight * (portrait ? 0.43 : 0.62);
 
   // Snap to target on first frame so the vehicle is immediately visible
   const firstFrame = camera.x === 0 && camera.y === 0 && camera.targetX === 0 && camera.targetY === 0;

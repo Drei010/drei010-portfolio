@@ -45,7 +45,7 @@ export function createTerrainState(): TerrainState {
   return {
     chunks: [],
     lastGeneratedX: -CHUNK_WIDTH * 2,
-    seed: Math.random() * 1000,
+    seed: 1,
   };
 }
 
@@ -57,7 +57,8 @@ export function generateChunk(
   const vertices: { x: number; y: number }[] = [];
   const bodies: Matter.Body[] = [];
 
-  for (let x = startX; x <= startX + CHUNK_WIDTH; x += SEGMENT_WIDTH) {
+  for (let offset = 0; offset <= Math.ceil(CHUNK_WIDTH / SEGMENT_WIDTH); offset += 1) {
+    const x = startX + Math.min(offset * SEGMENT_WIDTH, CHUNK_WIDTH);
     const y = getTerrainHeight(x, seed);
     vertices.push({ x, y });
   }
@@ -102,9 +103,10 @@ export function generateChunk(
 export function updateTerrain(
   state: TerrainState,
   cameraX: number,
-  world: Matter.World
+  world: Matter.World,
+  visibleWidth = CHUNK_WIDTH * 2
 ): TerrainState {
-  const generateAhead = cameraX + CHUNK_WIDTH * 3;
+  const generateAhead = cameraX + visibleWidth + CHUNK_WIDTH;
   const removeDistance = cameraX - CHUNK_WIDTH * 3;
 
   let { chunks, lastGeneratedX } = state;

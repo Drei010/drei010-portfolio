@@ -1,4 +1,15 @@
-import Matter from "matter-js";
+import type Matter from "matter-js";
+
+export type GamePhase = "ready" | "playing" | "complete";
+export type PortfolioItem = {
+  id: string;
+  type: CollectibleType;
+  title: string;
+  summary: string;
+  actions?: { label: string; href: string }[];
+};
+export type DiscoveryEvent = { type: "discovery"; item: PortfolioItem };
+export type GameUpdate = { state: GameState; events: DiscoveryEvent[] };
 
 export type GameState = {
   engine: Matter.Engine;
@@ -6,12 +17,9 @@ export type GameState = {
   terrain: TerrainState;
   camera: CameraState;
   collectibles: CollectibleState;
-  cloudInfos: CloudInfo[];
   controls: ControlsState;
   distance: number;
-  score: number;
-  running: boolean;
-  started: boolean;
+  phase: GamePhase;
 };
 
 export type VehicleState = {
@@ -63,21 +71,6 @@ export type CollectibleState = {
   collectedDataIndices: number[];
   totalSpawned: number;
   lastSpawnX: number;
-};
-
-export type CloudInfo = {
-  id: string;
-  type: CollectibleType;
-  title: string;
-  content: string;
-  x: number;
-  y: number;
-  opacity: number;
-  fadeIn: boolean;
-  fadeOut: boolean;
-  lifetime: number;
-  maxLifetime: number;
-  scale: number;
 };
 
 export type ControlsState = {
