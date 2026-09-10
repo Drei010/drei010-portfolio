@@ -19,12 +19,12 @@ export function ThemeToggle() {
       aria-checked={isDark}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
       onClick={toggleTheme}
-      className="relative flex h-11 w-14 items-center rounded-full border border-border bg-surface-alt p-0.5 transition-colors duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+      className="relative flex h-11 w-20 shrink-0 items-center overflow-hidden rounded-full border border-border bg-surface-alt p-0.5 transition-colors duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
     >
       {/* Sliding indicator */}
       <span
-        className={`absolute top-0.5 left-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary shadow-sm transition-transform duration-200 ${
-          isDark ? "translate-x-6" : "translate-x-0"
+        className={`absolute top-0.5 left-0.5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-primary shadow-sm transition-transform duration-200 ${
+          isDark ? "translate-x-9" : "translate-x-0"
         }`}
         aria-hidden="true"
       >
