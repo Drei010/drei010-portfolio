@@ -17,6 +17,11 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
     },
+    {
+      name: "showcase-webkit",
+      testMatch: "projects-showcase.spec.ts",
+      use: { ...devices["Desktop Safari"], viewport: { width: 1440, height: 900 } },
+    },
     { name: "webkit", testMatch: "gameplay.spec.ts", use: { ...devices["Desktop Safari"], viewport: { width: 1440, height: 900 } } },
     { name: "iphone-portrait", testMatch: "gameplay.spec.ts", use: { ...devices["iPhone 15"] } },
     { name: "iphone-landscape", testMatch: "gameplay.spec.ts", use: { ...devices["iPhone 15 landscape"] } },

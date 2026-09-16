@@ -91,6 +91,62 @@ input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visib
   transition: none !important;
 }
 
+.project-showcase { display: none; }
+.project-cards-fallback { display: grid; }
+
+@media (min-width: 1024px) and (min-height: 700px) {
+  .project-showcase {
+    display: block;
+    min-height: 78vh;
+  }
+  .project-cards-fallback { display: none; }
+}
+
+@media (min-width: 1024px) and (min-height: 700px) and (prefers-reduced-motion: reduce) {
+  .project-showcase { display: none; }
+  .project-cards-fallback { display: grid; }
+}
+
+.project-showcase-pin {
+  min-height: 78vh;
+  display: grid;
+  align-items: center;
+}
+
+.project-showcase-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(480px, 1.22fr);
+  align-items: center;
+  gap: clamp(1.5rem, 5vw, 5rem);
+}
+
+.project-showcase-copy { min-height: 360px; }
+.project-showcase-panels { position: relative; min-height: 300px; }
+.project-showcase-panel { position: absolute; inset: 0 auto auto 0; width: 100%; }
+.project-showcase-line { display: block; overflow: hidden; }
+.project-showcase-line > * { display: inline-block; }
+.project-showcase-device {
+  position: relative;
+  width: min(100%, 760px, 86vh);
+  justify-self: end;
+  transform: scale(1.2);
+  transform-origin: center right;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 2rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 66%);
+}
+.project-showcase-canvas { display: block; width: 100%; height: 100%; }
+.project-showcase-video { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.project-showcase-failed { display: none !important; }
+.project-showcase-failed + .project-cards-fallback { display: grid !important; }
+
+@media (max-width: 1199px) {
+  .project-showcase-grid { gap: 2rem; }
+  .project-showcase-title { font-size: 2.75rem; }
+}
+
 /* Game UI stays in logical CSS pixels; only the canvas buffer scales with DPR. */
 .game-shell, .game-loading {
   width: 100%; height: 100dvh; position: relative; overflow: hidden;

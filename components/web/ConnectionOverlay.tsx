@@ -35,11 +35,15 @@ export function ConnectionOverlay({
     const containerRect = containerRef.current.getBoundingClientRect();
     const skillRect = skillElement.getBoundingClientRect();
 
-    const matchingProjects = projectsData.filter((p) =>
-      p.techStack.includes(activeSkill)
-    );
-
     const projectRefs = projectRefsMap.current;
+    const showcaseActive = [...projectRefs.values()].some(
+      (element) => element.dataset.showcaseActive === "true"
+    );
+    const matchingProjects = projectsData.filter(
+      (p) =>
+        p.techStack.includes(activeSkill) &&
+        (!showcaseActive || projectRefs.get(p.id)?.dataset.showcaseActive === "true")
+    );
     const newLines: ConnectionLine[] = [];
 
     for (const project of matchingProjects) {
@@ -75,12 +79,15 @@ export function ConnectionOverlay({
     const handleResize = () => calculateLines();
     window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", handleResize, { passive: true });
+    const scrollParent = containerRef.current?.closest<HTMLElement>("[data-web-scroll-container]");
+    scrollParent?.addEventListener("scroll", handleResize, { passive: true });
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleResize);
+      scrollParent?.removeEventListener("scroll", handleResize);
     };
-  }, [calculateLines]);
+  }, [calculateLines, containerRef]);
 
   if (!activeSkill || svgSize.width === 0) {
     return null;

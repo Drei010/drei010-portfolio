@@ -4,6 +4,7 @@ import { useState } from "react";
 import { projectsData } from "@/lib/data/projects";
 import { ProjectCard } from "@/components/web/ProjectCard";
 import { ProjectModal } from "@/components/web/ProjectModal";
+import { ProjectShowcase } from "@/components/web/ProjectShowcase";
 import { AnimatedHeading } from "@/components/web/AnimatedHeading";
 import { Project } from "@/lib/types";
 
@@ -29,7 +30,11 @@ export function ProjectsSection({
             {projectsData.length} builds
           </span>
         </div>
-        <div className="grid gap-8 lg:grid-cols-2">
+        <ProjectShowcase
+          onSelect={setSelectedProject}
+          projectRefs={projectRefs}
+        />
+        <div className="project-cards-fallback grid gap-8 lg:grid-cols-2">
           {projectsData.map((project, index) => (
             <ProjectCard
               key={project.id}
@@ -39,7 +44,13 @@ export function ProjectsSection({
               highlighted={
                 !!activeSkill && project.techStack.includes(activeSkill)
               }
-              cardRef={(el) => projectRefs?.(project.id, el)}
+              cardRef={(el) => {
+                if (!el) {
+                  projectRefs?.(project.id, null);
+                } else if (el.offsetParent) {
+                  projectRefs?.(project.id, el);
+                }
+              }}
             />
           ))}
         </div>
