@@ -95,11 +95,11 @@ input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visib
 .project-cards-fallback { display: grid; }
 
 @media (min-width: 1024px) and (min-height: 700px) {
-  .project-showcase {
+  .project-showcase[data-cache-ready="true"] {
     display: block;
     min-height: 78vh;
   }
-  .project-cards-fallback { display: none; }
+  .project-showcase[data-cache-ready="true"] + .project-cards-fallback { display: none; }
 }
 
 @media (min-width: 1024px) and (min-height: 700px) and (prefers-reduced-motion: reduce) {

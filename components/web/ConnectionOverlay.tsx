@@ -75,6 +75,7 @@ export function ConnectionOverlay({
 
   useEffect(() => {
     calculateLines();
+    if (!activeSkill || !skillElement) return;
 
     const handleResize = () => calculateLines();
     window.addEventListener("resize", handleResize);
@@ -87,7 +88,7 @@ export function ConnectionOverlay({
       window.removeEventListener("scroll", handleResize);
       scrollParent?.removeEventListener("scroll", handleResize);
     };
-  }, [calculateLines, containerRef]);
+  }, [calculateLines, containerRef, activeSkill, skillElement]);
 
   if (!activeSkill || svgSize.width === 0) {
     return null;
