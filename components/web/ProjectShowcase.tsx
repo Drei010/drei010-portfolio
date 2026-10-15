@@ -431,7 +431,7 @@ export function ProjectShowcase({
         frameCache.transition.push(...await bakeClip(transitionVideo, FRAMES, signal));
         const loadedImages = await loadedImagesPromise;
         if (disposed || signal.aborted) return;
-        images.push(...loadedImages.map(prepareThumbnail));
+        images.push(...loadedImages.map((image) => prepareThumbnail(image)));
 
         splits.push(
           ...descriptionRefs.current.map(
