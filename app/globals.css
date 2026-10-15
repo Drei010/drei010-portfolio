@@ -126,11 +126,13 @@ input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visib
 .project-showcase-line { display: block; overflow: hidden; }
 .project-showcase-line > * { display: inline-block; }
 .project-showcase-device {
+  --device-size: min(100%, 760px, 86vh);
   position: relative;
-  width: min(100%, 760px, 86vh);
+  /* Enlarge with layout instead of transform: scale so the canvas is not re-rasterized on every scroll frame. */
+  width: calc(var(--device-size) * 1.2);
+  margin-block: calc(var(--device-size) * -0.1);
+  margin-left: calc(var(--device-size) * -0.2);
   justify-self: end;
-  transform: scale(1.2);
-  transform-origin: center right;
   aspect-ratio: 1;
   display: grid;
   place-items: center;

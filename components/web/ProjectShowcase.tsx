@@ -54,6 +54,11 @@ type RenderState = {
   blend: number;
 };
 
+type Thumbnail = {
+  orbit: HTMLCanvasElement;
+  transition: HTMLCanvasElement;
+};
+
 type CachedFrame = {
   bitmap: ImageBitmap;
   x: number;
@@ -93,7 +98,7 @@ export function ProjectShowcase({
       nextProject: 0,
       blend: 0,
     };
-    const images: HTMLImageElement[] = [];
+    const images: Thumbnail[] = [];
     const splits: SplitText[] = [];
     const frameCache: { orbit: (CachedFrame | null)[]; transition: (CachedFrame | null)[] } = {
       orbit: [],
@@ -327,8 +332,8 @@ export function ProjectShowcase({
       const mask = swivel ? SWIVEL_SCREEN_MASK : SCREEN_MASK;
       const laptopScale = swivel ? 1 : TRANSITION_SCALE;
 
-      const drawThumbnail = (image: HTMLImageElement, opacity: number) => {
-        if (!image.complete || !image.naturalWidth || opacity <= 0) return;
+      const drawThumbnail = (thumbnail: Thumbnail | undefined, opacity: number) => {
+        if (!thumbnail || opacity <= 0) return;
         ctx.save();
         ctx.globalAlpha = opacity;
         ctx.translate(540, 540 + (swivel ? 0 : TRANSITION_Y));
@@ -339,8 +344,8 @@ export function ProjectShowcase({
         mask.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
         ctx.closePath();
         ctx.clip();
-        if (swivel) ctx.drawImage(image, 246, 311, 588, 372);
-        else ctx.drawImage(image, 203, 218, 692, 441);
+        if (swivel) ctx.drawImage(thumbnail.orbit, 246, 311);
+        else ctx.drawImage(thumbnail.transition, 203, 218);
         ctx.restore();
       };
 
@@ -381,6 +386,23 @@ export function ProjectShowcase({
         image.src = src;
       });
 
+    // Decode and downscale each screenshot once, so a project switch never pays for it mid-scroll.
+    const prepareThumbnail = (image: HTMLImageElement): Thumbnail => {
+      const scaled = (width: number, height: number) => {
+        const target = document.createElement("canvas");
+        target.width = width;
+        target.height = height;
+        const ctx = target.getContext("2d");
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(image, 0, 0, width, height);
+        }
+        return target;
+      };
+      return { orbit: scaled(588, 372), transition: scaled(692, 441) };
+    };
+
     const setActive = (index: number) => {
       if (renderState.project === index && panelRefs.current[index]?.dataset.showcaseActive === "true") return;
       renderState.project = index;
@@ -409,7 +431,7 @@ export function ProjectShowcase({
         frameCache.transition.push(...await bakeClip(transitionVideo, FRAMES, signal));
         const loadedImages = await loadedImagesPromise;
         if (disposed || signal.aborted) return;
-        images.push(...loadedImages);
+        images.push(...loadedImages.map(prepareThumbnail));
 
         splits.push(
           ...descriptionRefs.current.map(
@@ -447,6 +469,8 @@ export function ProjectShowcase({
             start: "top top",
             end: () => `+=${Math.max(window.innerHeight * 7, window.innerHeight * (timeline?.duration() ?? 7))}`,
             pin: true,
+            // Custom scrollers default to transform pinning, which lags a frame behind native scrolling.
+            pinType: "fixed",
             scroller,
             scrub: 0.35,
             anticipatePin: 1,
