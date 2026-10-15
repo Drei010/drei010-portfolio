@@ -555,7 +555,7 @@ export function ProjectShowcase({
         clip.addEventListener("error", onMediaError);
         clip.load();
       }
-      setup();
+      void setup();
     }
 
     return () => {
