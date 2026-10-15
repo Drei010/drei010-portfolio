@@ -129,9 +129,11 @@ input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visib
   --device-size: min(100%, 760px, 86vh);
   position: relative;
   /* Enlarge with layout instead of transform: scale so the canvas is not re-rasterized on every scroll frame. */
-  width: calc(var(--device-size) * 1.2);
-  margin-block: calc(var(--device-size) * -0.1);
-  margin-left: calc(var(--device-size) * -0.2);
+  --device-overhang: calc(var(--device-size) / 10);
+  width: calc(var(--device-size) + 2 * var(--device-overhang));
+  margin-top: calc(-1 * var(--device-overhang));
+  margin-bottom: calc(-1 * var(--device-overhang));
+  margin-left: calc(-2 * var(--device-overhang));
   justify-self: end;
   aspect-ratio: 1;
   display: grid;
