@@ -74,6 +74,43 @@ test.describe("project laptop showcase", () => {
     }
   });
 
+  test("reveals each description only after its title has appeared", async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto("/");
+    const showcase = page.getByTestId("project-showcase");
+    await expect(showcase).toHaveAttribute("data-cache-ready", "true", { timeout: 120_000 });
+    const scroller = page.locator("[data-web-scroll-container]");
+    await page.locator("#projects").evaluate((element) => element.scrollIntoView({ block: "start" }));
+    await page.waitForTimeout(400);
+
+    const readCopy = () => showcase.evaluate((element) => {
+      const panel = element.querySelector('article[aria-hidden="false"]')!;
+      const opacity = (node: Element) => Number(getComputedStyle(node).opacity);
+      const lines = Array.from(panel.querySelectorAll(".project-showcase-line"));
+      return {
+        title: panel.querySelector("h3")!.textContent,
+        titleOpacity: opacity(panel.querySelector("h3")!),
+        lineOpacities: lines.map(opacity),
+      };
+    });
+    const before = await readCopy();
+    expect(before.titleOpacity).toBe(0);
+    expect(before.lineOpacities.length).toBeGreaterThan(0);
+    expect(before.lineOpacities.every((value) => value === 0)).toBe(true);
+
+    const seen = new Set<string>();
+    for (let step = 0; step < 120 && seen.size < 3; step += 1) {
+      await scroller.evaluate((element) => element.scrollBy(0, 120));
+      await page.waitForTimeout(250);
+      const copy = await readCopy();
+      if (copy.lineOpacities.some((value) => value > 0)) {
+        expect(copy.titleOpacity).toBe(1);
+        seen.add(copy.title!);
+      }
+    }
+    expect(seen.size).toBe(3);
+  });
+
   test("fits the thumbnail inside the screen and preserves the notch", async ({ page }) => {
     await page.route("**/projects/rag-backend.svg", (route) => route.fulfill({
       contentType: "image/svg+xml",

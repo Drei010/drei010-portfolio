@@ -100,6 +100,9 @@ export function ProjectShowcase({
     };
     const images: Thumbnail[] = [];
     const splits: SplitText[] = [];
+    // autoSplit rebuilds the description lines on resize, so the scroll timeline drives a progress
+    // value and each fresh split replays its own line animation from that point.
+    const lineReveals = projectsData.map(() => ({ progress: 0, animation: undefined as gsap.core.Tween | undefined }));
     const frameCache: { orbit: (CachedFrame | null)[]; transition: (CachedFrame | null)[] } = {
       orbit: [],
       transition: [],
@@ -433,20 +436,32 @@ export function ProjectShowcase({
         if (disposed || signal.aborted) return;
         images.push(...loadedImages.map((image) => prepareThumbnail(image)));
 
+        // Show the section before splitting so the lines are measured at their real width.
+        root.dataset.cacheReady = "true";
         splits.push(
           ...descriptionRefs.current.map(
-            (description) =>
+            (description, index) =>
               new SplitText(description, {
                 type: "lines",
                 linesClass: "project-showcase-line",
                 autoSplit: true,
+                onSplit: (split) => {
+                  const reveal = lineReveals[index];
+                  reveal.animation?.kill();
+                  reveal.animation = gsap.fromTo(
+                    split.lines,
+                    { autoAlpha: 0, y: 22 },
+                    { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.18, ease: "none", paused: true }
+                  );
+                  reveal.animation.progress(reveal.progress);
+                },
               })
           )
         );
 
         gsap.set(panelRefs.current, { autoAlpha: 0 });
         gsap.set(panelRefs.current[0], { autoAlpha: 1 });
-        gsap.set(root.querySelectorAll(".project-showcase-title, .project-showcase-line, .project-showcase-actions"), {
+        gsap.set(root.querySelectorAll(".project-showcase-title, .project-showcase-actions"), {
           autoAlpha: 0,
           y: 22,
         });
@@ -480,7 +495,6 @@ export function ProjectShowcase({
 
         timeline = sequence;
         cacheReady = true;
-        root.dataset.cacheReady = "true";
         resizeCanvas();
         sequence.to(renderState, {
           frame: FRAMES - 1,
@@ -489,7 +503,8 @@ export function ProjectShowcase({
         projectsData.forEach((project, index) => {
           const panel = panelRefs.current[index];
           const title = panel?.querySelector(".project-showcase-title");
-          const lines = splits[index]?.lines ?? [];
+          const reveal = lineReveals[index];
+          const lineCount = splits[index]?.lines.length ?? 0;
           const actions = panel?.querySelector(".project-showcase-actions");
           if (!panel || !title || !actions) return;
 
@@ -515,9 +530,15 @@ export function ProjectShowcase({
               });
           }
 
-            sequence
+          sequence
             .to(title, { autoAlpha: 1, y: 0, duration: 0.35 })
-            .to(lines, { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.18 })
+            .to(reveal, {
+              progress: 1,
+              duration: 0.35 + 0.18 * Math.max(lineCount - 1, 0),
+              onUpdate: () => {
+                reveal.animation?.progress(reveal.progress);
+              },
+            })
             .to(actions, { autoAlpha: 1, y: 0, duration: 0.3 })
             .to({}, { duration: 0.55 });
         });
@@ -571,6 +592,7 @@ export function ProjectShowcase({
       }
       resizeObserver?.disconnect();
       splits.forEach((split) => split.revert());
+      lineReveals.forEach((reveal) => reveal.animation?.kill());
       timeline?.scrollTrigger?.kill();
       timeline?.kill();
       context.revert();
