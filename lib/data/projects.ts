@@ -38,4 +38,13 @@ export const projectsData: Project[] = [
     techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
     repoUrl: "https://github.com/Drei010/drei010-portfolio",
   },
+  {
+    id: "project-5",
+    title: "Lucky Idea",
+    description:
+      "A slot-machine idea generator: pull the lever to spin a domain, approach, and audience into one practical project idea, checked against similar builds.",
+    thumbnail: "/projects/lucky-idea.svg",
+    techStack: ["Expo", "React Native", "TypeScript", "Three.js", "Zustand", "OpenAI", "Exa"],
+    repoUrl: "https://github.com/Drei010/Idea-Generator",
+  },
 ];
